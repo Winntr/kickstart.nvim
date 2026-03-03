@@ -348,7 +348,7 @@ return {
   { -- show diagnostics list
     -- PERF: Slows down insert mode if open and there are many diagnostics
     'folke/trouble.nvim',
-    enabled = false,
+    enabled = true,
     config = function()
       local trouble = require 'trouble'
       trouble.setup {}

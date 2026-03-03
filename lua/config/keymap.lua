@@ -145,11 +145,18 @@ end
 local function term_new(opts)
   opts = opts or {}
   local position = opts.position or "bottom"
+  local name = opts.name
 
   local win_opts = {
     position = position,
-    style = position == "float" and "float" or "terminal",
   }
+
+  -- Set custom title via on_buf callback if name is provided
+  if name then
+    win_opts.on_buf = function(self)
+      vim.b[self.buf].term_title = name
+    end
+  end
 
   return Snacks.terminal.open(nil, { win = win_opts })
 end
@@ -281,14 +288,39 @@ end
 -- User Commands
 -- ============================================================================
 
--- :TermNew [position] - Open new terminal
+-- :TermNew [pos=position] [name=name] - Open new terminal
 vim.api.nvim_create_user_command('TermNew', function(cmd_opts)
-  local position = cmd_opts.fargs[1] or "bottom"
-  term_new({ position = position })
+  local position = "bottom"
+  local name = nil
+  -- Parse named arguments like pos=float name=somename
+  for _, arg in ipairs(cmd_opts.fargs) do
+    local key, value = arg:match("^(%w+)=(.+)$")
+    if key and value then
+      if key == "pos" or key == "position" then
+        position = value
+      elseif key == "name" then
+        name = value
+      end
+    elseif not arg:match("=") then
+      -- Fallback: treat bare argument as position for backward compat
+      position = arg
+    end
+  end
+  term_new({ position = position, name = name })
 end, {
-  nargs = '?',
-  complete = function() return { 'bottom', 'right', 'left', 'top', 'float' } end,
-  desc = 'Open new terminal. Usage: :TermNew [position]'
+  nargs = '*',
+  complete = function(_, cmdline)
+    local args = vim.split(cmdline, '%s+')
+    local last = args[#args] or ""
+    if last:match("^pos=") then
+      return { 'pos=bottom', 'pos=right', 'pos=left', 'pos=top', 'pos=float' }
+    elseif last:match("^name=") then
+      return {}
+    else
+      return { 'pos=', 'name=' }
+    end
+  end,
+  desc = 'Open new terminal. Usage: :TermNew [pos=position] [name=name]'
 })
 
 -- :TermSelect - Pick from open terminals
