@@ -116,16 +116,32 @@ return {
 
   { -- edit the file system as a buffer
     'stevearc/oil.nvim',
-    opts = {
-      keymaps = {
-        ['<C-s>'] = false,
-        ['<C-h>'] = false,
-        ['<C-l>'] = false,
-      },
-      view_options = {
-        show_hidden = true,
-      },
-    },
+    config = function()
+      require('oil').setup({
+        keymaps = {
+          ['<C-s>'] = false,
+          ['<C-h>'] = false,
+          ['<C-l>'] = false,
+          -- Fuzzy find files in current directory
+          ['<leader>ff'] = {
+            function()
+              require('misc.pickers').find_files({ cwd = require('oil').get_current_dir() })
+            end,
+            desc = '[f]ind files in dir',
+          },
+          -- Live grep in current directory
+          ['<leader>fg'] = {
+            function()
+              require('misc.pickers').live_grep({ cwd = require('oil').get_current_dir() })
+            end,
+            desc = '[g]rep in dir',
+          },
+        },
+        view_options = {
+          show_hidden = true,
+        },
+      })
+    end,
     dependencies = { 'nvim-tree/nvim-web-devicons' },
     keys = {
       -- ORIGINAL: { '-', ':Oil<cr>', desc = 'oil' }, -- Changed to <leader>eo to free '-' for decrement
