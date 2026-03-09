@@ -133,8 +133,11 @@ require 'config.global'
 require 'config.autocommands'
 -- [[ Set the runtime path for Neovim ]]
 -- vim.g.python3_host_prog = vim.fn.expand("~/.local/share/nvim/venv/bin/python")
--- Check if the venv exists before setting it
-local venv_python = vim.fn.expand("~/.local/share/nvim/venv/bin/python")
+-- Check if the venv exists before setting it (handle both Unix and Windows paths)
+local venv_base = vim.fn.stdpath('data') .. '/venv'
+local venv_python = vim.fn.has('win32') == 1
+    and venv_base .. '/Scripts/python.exe'
+    or venv_base .. '/bin/python'
 if vim.fn.executable(venv_python) == 1 then
     vim.g.python3_host_prog = venv_python
 end

@@ -5,11 +5,11 @@ return {
     lazy = false,
     dev = false,
     dependencies = {
-      -- {
-      --   'nvim-treesitter/nvim-treesitter-textobjects',
-      --   dev = false,
-      --   enabled = true,
-      -- },
+      {
+        'nvim-treesitter/nvim-treesitter-textobjects',
+        dev = false,
+        enabled = true,
+      },
     },
     run = ':TSUpdate',
     config = function()
@@ -50,6 +50,8 @@ return {
           'javascript',
           'mermaid',
           'typescript',
+          'http', -- For kulala.nvim HTTP files
+          'json', -- For kulala.nvim response formatting
         },
         highlight = {
           enable = true,
@@ -77,6 +79,9 @@ return {
               ['if'] = '@function.inner',
               ['ac'] = '@class.outer',
               ['ic'] = '@class.inner',
+              -- Code blocks (for Jupyter notebooks / markdown)
+              ['ab'] = '@code_cell.outer',
+              ['ib'] = '@code_cell.inner',
             },
           },
           move = {
@@ -85,18 +90,31 @@ return {
             goto_next_start = {
               [']m'] = '@function.outer',
               [']]'] = '@class.inner',
+              [']b'] = '@code_cell.outer', -- next code block
             },
             goto_next_end = {
               [']M'] = '@function.outer',
               [']['] = '@class.outer',
+              [']B'] = '@code_cell.outer', -- end of next code block
             },
             goto_previous_start = {
               ['[m'] = '@function.outer',
               ['[['] = '@class.inner',
+              ['[b'] = '@code_cell.outer', -- previous code block
             },
             goto_previous_end = {
               ['[M'] = '@function.outer',
               ['[]'] = '@class.outer',
+              ['[B'] = '@code_cell.outer', -- end of previous code block
+            },
+          },
+          swap = {
+            enable = true,
+            swap_next = {
+              ['<leader>sbl'] = '@code_cell.outer', -- swap code block with next
+            },
+            swap_previous = {
+              ['<leader>sbh'] = '@code_cell.outer', -- swap code block with previous
             },
           },
         },
