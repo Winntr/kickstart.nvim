@@ -543,6 +543,7 @@ wk.add({
   { '<leader>x', group = 'e[x]ecute' },
   { '<leader>xx', ':w<cr>:source %<cr>', desc = '[x] source %' },
   { '<leader>a', group = '[A]i tools' },
+  { '<leader>D', group = '[D]atabase' },
   { '<leader>st', ':Store<cr>', desc = 'Open Store' },
   { '<leader>t', group = '[t]erminal' },
   { '<leader>tn', function() term_new({ position = 'bottom' }) end, desc = '[n]ew terminal (bottom)' },
