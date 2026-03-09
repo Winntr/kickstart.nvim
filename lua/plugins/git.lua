@@ -39,6 +39,41 @@ return {
     end,
   },
 
+  -- Inline merge conflict resolution
+  -- Highlights conflict markers and provides granular actions (ours/theirs/both/base/none)
+  -- See: GitHowTo/gitconflict.md
+  {
+    'akinsho/git-conflict.nvim',
+    version = '*',
+    event = 'BufReadPre',
+    cmd = {
+      'GitConflictChooseOurs',
+      'GitConflictChooseTheirs',
+      'GitConflictChooseBoth',
+      'GitConflictChooseBase',
+      'GitConflictChooseNone',
+      'GitConflictListQf',
+      'GitConflictRefresh',
+    },
+    opts = {
+      default_mappings = {
+        ours = 'co',
+        theirs = 'ct',
+        none = 'c0',
+        both = 'cb',
+        next = ']x',
+        prev = '[x',
+      },
+      default_commands = true,
+      disable_diagnostics = true,
+      list_opener = 'copen',
+      highlights = {
+        incoming = 'DiffAdd',
+        current = 'DiffText',
+      },
+    },
+  },
+
   -- Neogit disabled - too slow on Windows (~3s to open)
   -- {
   --   "NeogitOrg/neogit",

@@ -483,7 +483,23 @@ wk.add({
     end, desc = 'Grep word/selection', mode = { 'n', 'x' } },
 
   { '<leader>g', group = '[g]it' },
-  { '<leader>gc', ':GitConflictRefresh<cr>', desc = '[c]onflict' },
+  { '<leader>gc', group = '[c]onflict' },
+  { '<leader>gcr', ':GitConflictRefresh<cr>', desc = '[r]efresh' },
+  { '<leader>gcl', function()
+    vim.cmd('GitConflictRefresh')
+    vim.schedule(function()
+      vim.cmd('GitConflictListQf')
+      -- GitConflictListQf silently does nothing when no conflicts found
+      if #vim.fn.getqflist() == 0 then
+        vim.notify('No merge conflicts found', vim.log.levels.INFO)
+      end
+    end)
+  end, desc = '[l]ist in quickfix' },
+  { '<leader>gco', ':GitConflictChooseOurs<cr>', desc = 'choose [o]urs' },
+  { '<leader>gct', ':GitConflictChooseTheirs<cr>', desc = 'choose [t]heirs' },
+  { '<leader>gcb', ':GitConflictChooseBoth<cr>', desc = 'choose [b]oth' },
+  { '<leader>gcn', ':GitConflictChooseNone<cr>', desc = 'choose [n]one' },
+  { '<leader>gc0', ':GitConflictChooseBase<cr>', desc = 'choose base [0]' },
   -- { '<leader>gs', ':Gitsigns<cr>', desc = 'git [s]igns' },
   { '<leader>gm', function() require('misc.ai-commit').commit() end, desc = 'AI commit [m]essage' },
   { '<leader>gM', function() require('misc.ai-commit').select_model() end, desc = 'Set AI [M]odel' },
