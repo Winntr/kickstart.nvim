@@ -68,12 +68,19 @@ return {
     },
   },
 
-  -- interactive global search and replace
+  -- search and replace (replaces spectre)
   {
-    'nvim-pack/nvim-spectre',
-    cmd = { 'Spectre' },
-    dependencies = {
-      'nvim-lua/plenary.nvim',
+    'MagicDuck/grug-far.nvim',
+    cmd = 'GrugFar',
+    keys = {
+      { '<leader>sr', function() require('grug-far').open() end, desc = 'Search and [r]eplace (grug-far)' },
+      { '<leader>srw', function() require('grug-far').open({ prefills = { search = vim.fn.expand('<cword>') } }) end, desc = 'Search [w]ord (grug-far)' },
+      { '<leader>sr', function()
+          require('grug-far').open({ prefills = { search = vim.fn.expand('<cword>') } })
+        end, desc = 'Search selection (grug-far)', mode = 'v' },
+    },
+    opts = {
+      headerMaxWidth = 80,
     },
   },
 
@@ -112,5 +119,50 @@ return {
         },
       }
     end,
+  },
+
+  -- visual undo history tree
+  {
+    'mbbill/undotree',
+    cmd = 'UndotreeToggle',
+    keys = {
+      { '<leader>eu', '<cmd>UndotreeToggle<cr>', desc = '[u]ndotree toggle' },
+    },
+  },
+
+  -- yank ring / clipboard history
+  {
+    'gbprod/yanky.nvim',
+    event = 'VeryLazy',
+    opts = {
+      ring = { history_length = 50 },
+      highlight = { timer = 200 },
+    },
+    keys = {
+      { 'y', '<Plug>(YankyYank)', mode = { 'n', 'x' }, desc = 'Yank text' },
+      { 'p', '<Plug>(YankyPutAfter)', mode = { 'n', 'x' }, desc = 'Put yanked text after cursor' },
+      { 'P', '<Plug>(YankyPutBefore)', mode = { 'n', 'x' }, desc = 'Put yanked text before cursor' },
+      { '<c-p>', '<Plug>(YankyPreviousEntry)', desc = 'Select previous yank entry' },
+      { '<c-n>', '<Plug>(YankyNextEntry)', desc = 'Select next yank entry' },
+      { '<leader>fy', function() require('telescope').extensions.yank_history.yank_history() end, desc = '[y]ank history' },
+    },
+  },
+
+  -- language-aware refactoring
+  {
+    'ThePrimeagen/refactoring.nvim',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'nvim-treesitter/nvim-treesitter',
+    },
+    lazy = true,
+    keys = {
+      { '<leader>cre', function() require('refactoring').refactor('Extract Function') end, desc = '[e]xtract function', mode = 'x' },
+      { '<leader>crv', function() require('refactoring').refactor('Extract Variable') end, desc = 'extract [v]ariable', mode = 'x' },
+      { '<leader>cri', function() require('refactoring').refactor('Inline Variable') end, desc = '[i]nline variable', mode = { 'n', 'x' } },
+      { '<leader>crb', function() require('refactoring').refactor('Extract Block') end, desc = 'extract [b]lock' },
+      { '<leader>crr', function() require('telescope').extensions.refactoring.refactors() end, desc = '[r]efactor picker', mode = { 'n', 'x' } },
+    },
+    opts = {},
   },
 }

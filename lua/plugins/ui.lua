@@ -551,4 +551,59 @@ return {
       vim.keymap.set('n', '<leader>ic', clear_all_images, { buffer = true, desc = 'image [c]lear' })
     end,
   },
+
+  -- document outline / symbol sidebar
+  {
+    'stevearc/aerial.nvim',
+    dependencies = {
+      'nvim-treesitter/nvim-treesitter',
+      'nvim-tree/nvim-web-devicons',
+    },
+    cmd = { 'AerialToggle', 'AerialOpen', 'AerialNavToggle' },
+    keys = {
+      { '<leader>lo', '<cmd>AerialToggle!<cr>', desc = 'symbol [o]utline (aerial)' },
+      { '<leader>ln', '<cmd>AerialNavToggle<cr>', desc = 'symbol [n]avigation (aerial)' },
+    },
+    opts = {
+      backends = { 'lsp', 'treesitter', 'markdown', 'man' },
+      layout = {
+        min_width = 30,
+        default_direction = 'prefer_right',
+      },
+      show_guides = true,
+      filter_kind = false,
+      attach_mode = 'global',
+      on_attach = function(bufnr)
+        vim.keymap.set('n', '{', '<cmd>AerialPrev<cr>', { buffer = bufnr, desc = 'Aerial prev symbol' })
+        vim.keymap.set('n', '}', '<cmd>AerialNext<cr>', { buffer = bufnr, desc = 'Aerial next symbol' })
+      end,
+    },
+  },
+
+  -- better quickfix window
+  {
+    'kevinhwang91/nvim-bqf',
+    ft = 'qf',
+    opts = {
+      auto_enable = true,
+      auto_resize_height = true,
+      preview = {
+        auto_preview = true,
+        win_height = 12,
+        win_vheight = 12,
+        border = 'rounded',
+      },
+      func_map = {
+        open = '<cr>',
+        openc = 'o',
+        split = '<C-s>',
+        vsplit = '<C-v>',
+        tab = 't',
+        prevfile = '<C-p>',
+        nextfile = '<C-n>',
+        stoggleup = '<S-Tab>',
+        stoggledown = '<Tab>',
+      },
+    },
+  },
 }
