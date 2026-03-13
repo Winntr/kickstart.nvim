@@ -1,6 +1,5 @@
 -- plugins for notetaking and knowledge management
 return {
-
   {
     'nvim-neorg/neorg',
     enabled = false,
@@ -8,5 +7,4 @@ return {
       require('neorg').setup {}
     end,
   },
-
 }

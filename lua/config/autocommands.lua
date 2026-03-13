@@ -88,8 +88,10 @@ local function update_terminal_mode_visual()
 end
 
 -- Autocommands for terminal mode changes
+-- Only fire for terminal-related mode transitions (t = terminal mode)
+-- This prevents the expensive floating window operations from running on every keypress
 vim.api.nvim_create_autocmd('ModeChanged', {
-  pattern = '*',
+  pattern = { '*:t', 't:*' },  -- Only when entering or leaving terminal mode
   callback = function()
     -- Small delay to ensure mode has fully changed
     vim.schedule(update_terminal_mode_visual)
@@ -115,7 +117,8 @@ vim.api.nvim_create_autocmd('BufLeave', {
 
 -- ============================================================================
 
-vim.api.nvim_create_autocmd({ 'FocusGained', 'BufEnter' }, {
+-- Only check for external file changes on FocusGained (not BufEnter - too frequent)
+vim.api.nvim_create_autocmd({ 'FocusGained' }, {
   pattern = { '*' },
   command = 'checktime',
 })

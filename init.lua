@@ -68,6 +68,7 @@ vim.opt.inccommand = 'split'
 vim.opt.cursorline = true
 vim.opt.scrolloff = 10
 vim.opt.confirm = true
+vim.opt.autoread = true -- Required for opencode.nvim events.reload
 
 if vim.fn.has 'win32' == 1 then
   vim.opt.shell = 'pwsh.exe'
