@@ -1,6 +1,5 @@
-
 -- Prepend mise shims to PATH
-vim.env.PATH = vim.env.HOME .. "/.local/share/mise/shims:" .. vim.env.PATH
+vim.env.PATH = vim.env.HOME .. '/.local/share/mise/shims:' .. vim.env.PATH
 
 -- Set <space> as the leader key
 vim.g.mapleader = ' '
@@ -21,29 +20,25 @@ vim.api.nvim_create_autocmd('InsertLeave', { command = [[set relativenumber]] })
 vim.opt.mouse = 'a'
 vim.opt.showmode = false
 
-
-if vim.loop.os_uname().sysname == "Windows_NT" then
-
-elseif vim.loop.os_uname().sysname == "Linux" then
+if vim.loop.os_uname().sysname == 'Windows_NT' then
+elseif vim.loop.os_uname().sysname == 'Linux' then
   vim.schedule(function()
     -- vim.opt.clipboard = 'unnamedplus'
     vim.opt.clipboard = ''
   end)
-
-  vim.g.clipboard = {
-    name = 'OSC 52',
-    copy = {
-      ['+'] = require('vim.ui.clipboard.osc52').copy('+'),
-      ['*'] = require('vim.ui.clipboard.osc52').copy('*'),
-    },
-    paste = {
-      ['+'] = require('vim.ui.clipboard.osc52').paste('+'),
-      ['*'] = require('vim.ui.clipboard.osc52').paste('*'),
-    },
-  }
+  --
+  -- vim.g.clipboard = {
+  --   name = 'OSC 52',
+  --   copy = {
+  --     ['+'] = require('vim.ui.clipboard.osc52').copy('+'),
+  --     ['*'] = require('vim.ui.clipboard.osc52').copy('*'),
+  --   },
+  --   paste = {
+  --     ['+'] = require('vim.ui.clipboard.osc52').paste('+'),
+  --     ['*'] = require('vim.ui.clipboard.osc52').paste('*'),
+  --   },
+  -- }
 end
-
-
 
 vim.opt.breakindent = true
 vim.opt.wrap = false
@@ -88,7 +83,7 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 -- Double-escape to exit terminal mode (but not in lazygit)
 vim.keymap.set('t', '<Esc><Esc>', function()
   local bufname = vim.api.nvim_buf_get_name(0)
-  if bufname:match('lazygit') then
+  if bufname:match 'lazygit' then
     -- Send actual escape keys to lazygit
     return '<Esc><Esc>'
   end
@@ -99,7 +94,6 @@ vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left wind
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
-
 
 -- [[ Basic Autocommands ]]
 vim.api.nvim_create_autocmd('TextYankPost', {
@@ -135,12 +129,10 @@ require 'config.autocommands'
 -- [[ Set the runtime path for Neovim ]]
 -- vim.g.python3_host_prog = vim.fn.expand("~/.local/share/nvim/venv/bin/python")
 -- Check if the venv exists before setting it (handle both Unix and Windows paths)
-local venv_base = vim.fn.stdpath('data') .. '/venv'
-local venv_python = vim.fn.has('win32') == 1
-    and venv_base .. '/Scripts/python.exe'
-    or venv_base .. '/bin/python'
+local venv_base = vim.fn.stdpath 'data' .. '/venv'
+local venv_python = vim.fn.has 'win32' == 1 and venv_base .. '/Scripts/python.exe' or venv_base .. '/bin/python'
 if vim.fn.executable(venv_python) == 1 then
-    vim.g.python3_host_prog = venv_python
+  vim.g.python3_host_prog = venv_python
 end
 -- local user_profile = vim.fn.getenv 'USERPROFILE'
 
