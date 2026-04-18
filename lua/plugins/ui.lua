@@ -117,7 +117,7 @@ return {
   { -- edit the file system as a buffer
     'stevearc/oil.nvim',
     config = function()
-      require('oil').setup({
+      require('oil').setup {
         keymaps = {
           ['<C-s>'] = false,
           ['<C-h>'] = false,
@@ -125,14 +125,14 @@ return {
           -- Fuzzy find files in current directory
           ['<leader>ff'] = {
             function()
-              require('misc.pickers').find_files({ cwd = require('oil').get_current_dir() })
+              require('misc.pickers').find_files { cwd = require('oil').get_current_dir() }
             end,
             desc = '[f]ind files in dir',
           },
           -- Live grep in current directory
           ['<leader>fg'] = {
             function()
-              require('misc.pickers').live_grep({ cwd = require('oil').get_current_dir() })
+              require('misc.pickers').live_grep { cwd = require('oil').get_current_dir() }
             end,
             desc = '[g]rep in dir',
           },
@@ -140,12 +140,12 @@ return {
         view_options = {
           show_hidden = true,
         },
-      })
+      }
     end,
     dependencies = { 'nvim-tree/nvim-web-devicons' },
     keys = {
-      -- ORIGINAL: { '-', ':Oil<cr>', desc = 'oil' }, -- Changed to <leader>eo to free '-' for decrement
-      { '<leader>eo', ':Oil<cr>', desc = '[o]il' },
+      { '-', ':Oil<cr>', desc = 'oil' }, -- Changed to <leader>eo to free '-' for decrement
+      -- { '<leader>eo', ':Oil<cr>', desc = '[o]il' },
       { '<leader>ef', ':Oil<cr>', desc = 'edit [f]iles' },
     },
     cmd = 'Oil',
@@ -157,36 +157,42 @@ return {
     config = function()
       local function macro_recording()
         local reg = vim.fn.reg_recording()
-        if reg == '' then return '' end
+        if reg == '' then
+          return ''
+        end
         return '📷[' .. reg .. ']'
       end
 
       -- Short filename with parent dir (e.g., "plugins/ui.lua")
       local function short_path()
-        local filename = vim.fn.expand('%:t')
+        local filename = vim.fn.expand '%:t'
         if filename == '' then
           -- Scratch buffer - show cwd
           return '[' .. vim.fn.fnamemodify(vim.fn.getcwd(), ':t') .. ']'
         end
-        local parent = vim.fn.expand('%:p:h:t')
-        if parent == '' or parent == filename then return filename end
+        local parent = vim.fn.expand '%:p:h:t'
+        if parent == '' or parent == filename then
+          return filename
+        end
         return parent .. '/' .. filename
       end
 
       -- Truncated full path - shows full path, truncates if too long
       local function truncated_path()
         -- %:p = full path, %:~ = replace home with ~
-        local path = vim.fn.expand('%:p:~')
+        local path = vim.fn.expand '%:p:~'
         if path == '' then
           -- Scratch buffer - show full cwd path
           return vim.fn.fnamemodify(vim.fn.getcwd(), ':~')
         end
 
-        local max_len = math.floor(vim.o.columns * 0.3)  -- 30% of screen width
-        if #path <= max_len then return path end
+        local max_len = math.floor(vim.o.columns * 0.3) -- 30% of screen width
+        if #path <= max_len then
+          return path
+        end
 
         -- Truncate from the left, keeping the filename and some path context
-        local sep = vim.fn.has('win32') == 1 and '\\' or '/'
+        local sep = vim.fn.has 'win32' == 1 and '\\' or '/'
         local parts = vim.split(path, '[/\\]')
         if #parts <= 2 then
           return '…' .. path:sub(-(max_len - 1))
@@ -194,13 +200,15 @@ return {
 
         -- Keep first part (~ or drive), ellipsis, and some trailing context
         local first = parts[1]
-        local remaining = max_len - #first - 4  -- 4 for sep + "…" + sep
+        local remaining = max_len - #first - 4 -- 4 for sep + "…" + sep
 
         -- Build path from the end until we run out of space
         local tail = ''
         for i = #parts, 2, -1 do
           local part = parts[i]
-          if #tail + #part + 1 > remaining then break end
+          if #tail + #part + 1 > remaining then
+            break
+          end
           tail = sep .. part .. tail
         end
 
@@ -425,16 +433,16 @@ return {
       }
     end,
     init = function()
-      require("vim.treesitter.query").add_predicate("is-mise?", function(_, _, bufnr, _)
+      require('vim.treesitter.query').add_predicate('is-mise?', function(_, _, bufnr, _)
         local filepath = vim.api.nvim_buf_get_name(tonumber(bufnr) or 0)
-        local filename = vim.fn.fnamemodify(filepath, ":t")
-        return string.match(filename, ".*mise.*%.toml$") ~= nil
+        local filename = vim.fn.fnamemodify(filepath, ':t')
+        return string.match(filename, '.*mise.*%.toml$') ~= nil
       end, { force = true, all = false })
     end,
   },
 
   { -- render markdown with icons and formatting
-    "MeanderingProgrammer/render-markdown.nvim",
+    'MeanderingProgrammer/render-markdown.nvim',
     opts = {
       anti_conceal = { enabled = false },
       file_types = { 'markdown', 'opencode_output' },

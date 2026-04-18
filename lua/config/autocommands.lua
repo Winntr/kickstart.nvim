@@ -3,7 +3,7 @@ local function set_terminal_keymaps()
   local bufname = vim.api.nvim_buf_get_name(0)
 
   -- Don't override <Esc> for lazygit (it needs escape for navigation)
-  if not bufname:match('lazygit') then
+  if not bufname:match 'lazygit' then
     vim.keymap.set('t', '<esc>', [[<C-\><C-n>]], opts)
   end
 
@@ -18,8 +18,8 @@ end
 -- ============================================================================
 
 -- Define highlight groups for terminal modes
-vim.api.nvim_set_hl(0, 'TerminalNormalMode', { bg = '#2d1f1f' })  -- Reddish tint for normal mode
-vim.api.nvim_set_hl(0, 'TerminalInsertMode', { bg = 'NONE' })     -- Default for insert mode
+vim.api.nvim_set_hl(0, 'TerminalNormalMode', { bg = '#2d1f1f' }) -- Reddish tint for normal mode
+vim.api.nvim_set_hl(0, 'TerminalInsertMode', { bg = 'NONE' }) -- Default for insert mode
 vim.api.nvim_set_hl(0, 'TerminalModeIndicator', { fg = '#ff6b6b', bg = '#2d1f1f', bold = true })
 
 -- Track the floating window for mode indicator
@@ -90,47 +90,47 @@ end
 -- Autocommands for terminal mode changes
 -- Only fire for terminal-related mode transitions (t = terminal mode)
 -- This prevents the expensive floating window operations from running on every keypress
-vim.api.nvim_create_autocmd('ModeChanged', {
-  pattern = { '*:t', 't:*' },  -- Only when entering or leaving terminal mode
-  callback = function()
-    -- Small delay to ensure mode has fully changed
-    vim.schedule(update_terminal_mode_visual)
-  end,
-  desc = 'Update terminal mode visual indicator',
-})
-
-vim.api.nvim_create_autocmd('BufEnter', {
-  pattern = 'term://*',
-  callback = function()
-    vim.schedule(update_terminal_mode_visual)
-  end,
-  desc = 'Update terminal mode visual on buffer enter',
-})
-
-vim.api.nvim_create_autocmd('BufLeave', {
-  pattern = 'term://*',
-  callback = function()
-    hide_term_mode_indicator()
-  end,
-  desc = 'Hide terminal mode indicator on buffer leave',
-})
-
+-- vim.api.nvim_create_autocmd('ModeChanged', {
+--   pattern = { '*:t', 't:*' }, -- Only when entering or leaving terminal mode
+--   callback = function()
+--     -- Small delay to ensure mode has fully changed
+--     vim.schedule(update_terminal_mode_visual)
+--   end,
+--   desc = 'Update terminal mode visual indicator',
+-- })
+--
+-- vim.api.nvim_create_autocmd('BufEnter', {
+--   pattern = 'term://*',
+--   callback = function()
+--     vim.schedule(update_terminal_mode_visual)
+--   end,
+--   desc = 'Update terminal mode visual on buffer enter',
+-- })
+--
+-- vim.api.nvim_create_autocmd('BufLeave', {
+--   pattern = 'term://*',
+--   callback = function()
+--     hide_term_mode_indicator()
+--   end,
+--   desc = 'Hide terminal mode indicator on buffer leave',
+-- })
+--
 -- ============================================================================
 
 -- Only check for external file changes on FocusGained (not BufEnter - too frequent)
-vim.api.nvim_create_autocmd({ 'FocusGained' }, {
-  pattern = { '*' },
-  command = 'checktime',
-})
+-- vim.api.nvim_create_autocmd({ 'FocusGained' }, {
+--   pattern = { '*' },
+--   command = 'checktime',
+-- })
 
-vim.api.nvim_create_autocmd({ 'TermOpen' }, {
-  pattern = { '*' },
-  callback = function(_)
-    vim.cmd.setlocal 'nonumber'
-    vim.wo.signcolumn = 'no'
-    set_terminal_keymaps()
-  end,
-})
+-- vim.api.nvim_create_autocmd({ 'TermOpen' }, {
+--   pattern = { '*' },
+--   callback = function(_)
+--     vim.cmd.setlocal 'nonumber'
+--     vim.wo.signcolumn = 'no'
+--     set_terminal_keymaps()
+--   end,
+-- })
 
 -- Highlight when yanking (copying) text
 --  Try it with `yap` in normal mode

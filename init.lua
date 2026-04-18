@@ -104,6 +104,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
+vim.filetype.add { extension = { mdc = 'markdown' } }
 -- [[ Set indentation for specific file types ]]
 -- vim.api.nvim_create_autocmd({ 'FileType' }, {
 --   pattern = { 'python', 'yaml' },
