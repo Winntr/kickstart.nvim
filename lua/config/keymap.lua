@@ -3,25 +3,24 @@ local wk = require 'which-key'
 
 P = vim.print
 
-
 local nmap = function(key, effect, description)
-  description = description or ""
-  vim.keymap.set('n', key, effect, { silent = true, noremap = true, desc=description})
+  description = description or ''
+  vim.keymap.set('n', key, effect, { silent = true, noremap = true, desc = description })
 end
 
 local vmap = function(key, effect, description)
-  description = description or ""
-  vim.keymap.set('v', key, effect, { silent = true, noremap = true, desc=description})
+  description = description or ''
+  vim.keymap.set('v', key, effect, { silent = true, noremap = true, desc = description })
 end
 
 local imap = function(key, effect, description)
-  description = description or ""
-  vim.keymap.set('i', key, effect, { silent = true, noremap = true, desc=description })
+  description = description or ''
+  vim.keymap.set('i', key, effect, { silent = true, noremap = true, desc = description })
 end
 
 local cmap = function(key, effect, description)
-  description = description or ""
-  vim.keymap.set('c', key, effect, { silent = true, noremap = true, desc=description })
+  description = description or ''
+  vim.keymap.set('c', key, effect, { silent = true, noremap = true, desc = description })
 end
 
 -- move in command line
@@ -70,7 +69,6 @@ local function toggle_light_dark_theme()
   end
 end
 
-
 --- Insert code chunk of given language
 --- Splits current chunk if already within a chunk
 --- @param lang string
@@ -80,7 +78,6 @@ local insert_code_chunk = function(lang)
   keys = vim.api.nvim_replace_termcodes(keys, true, false, true)
   vim.api.nvim_feedkeys(keys, 'n', false)
 end
-
 
 local insert_py_chunk = function()
   insert_code_chunk 'python'
@@ -93,9 +90,6 @@ end
 local insert_bash_chunk = function()
   insert_code_chunk 'bash'
 end
-
-
-
 
 local function new_terminal(lang)
   vim.cmd('vsplit term://' .. lang)
@@ -113,22 +107,25 @@ local terminals = {}
 --- @param opts table|nil { position = "bottom"|"right"|"left"|"top"|"float" }
 local function get_or_create_terminal(num, opts)
   opts = opts or {}
-  local position = opts.position or "bottom"
+  local position = opts.position or 'bottom'
 
   -- Create terminal config for this number
   local term_opts = {
     win = {
       position = position,
-      style = position == "float" and "float" or "terminal",
+      style = position == 'float' and 'float' or 'terminal',
     },
   }
 
   -- Use Snacks.terminal with a unique identifier based on number
   -- The 'cwd' and 'env' combo creates unique terminal instances
-  return Snacks.terminal.toggle(nil, vim.tbl_extend("force", term_opts, {
-    cwd = vim.fn.getcwd(),
-    env = { TERM_NUM = tostring(num) },
-  }))
+  return Snacks.terminal.toggle(
+    nil,
+    vim.tbl_extend('force', term_opts, {
+      cwd = vim.fn.getcwd(),
+      env = { TERM_NUM = tostring(num) },
+    })
+  )
 end
 
 --- Toggle a specific numbered terminal (like ToggleTerm's <num><C-\>)
@@ -136,7 +133,7 @@ end
 --- @param position string|nil Position for new terminal
 local function toggle_terminal(num, position)
   num = num or 1
-  position = position or "bottom"
+  position = position or 'bottom'
   get_or_create_terminal(num, { position = position })
 end
 
@@ -144,7 +141,7 @@ end
 --- @param opts table|nil { position = "bottom"|"right"|"left"|"top"|"float", name = string }
 local function term_new(opts)
   opts = opts or {}
-  local position = opts.position or "bottom"
+  local position = opts.position or 'bottom'
   local name = opts.name
 
   local win_opts = {
@@ -169,7 +166,7 @@ local function get_terminal_buffers()
     if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_is_loaded(buf) then
       local buftype = vim.bo[buf].buftype
       local bufname = vim.api.nvim_buf_get_name(buf)
-      if buftype == "terminal" then
+      if buftype == 'terminal' then
         -- Get terminal job info
         local job_id = vim.b[buf].terminal_job_id
         local pid = job_id and vim.fn.jobpid(job_id) or nil
@@ -190,7 +187,7 @@ local function term_select()
   local term_bufs = get_terminal_buffers()
 
   if #term_bufs == 0 then
-    vim.notify("No terminals open", vim.log.levels.INFO)
+    vim.notify('No terminals open', vim.log.levels.INFO)
     return
   end
 
@@ -199,7 +196,7 @@ local function term_select()
   if ok and picker then
     local items = {}
     for i, term in ipairs(term_bufs) do
-      local display = string.format("%d: %s (pid: %s)", i, vim.fn.fnamemodify(term.name, ":t"), term.pid or "?")
+      local display = string.format('%d: %s (pid: %s)', i, vim.fn.fnamemodify(term.name, ':t'), term.pid or '?')
       table.insert(items, {
         text = display,
         buf = term.buf,
@@ -208,8 +205,10 @@ local function term_select()
     end
 
     picker.select(items, {
-      prompt = "Select Terminal",
-      format_item = function(item) return item.text end,
+      prompt = 'Select Terminal',
+      format_item = function(item)
+        return item.text
+      end,
     }, function(choice)
       if choice then
         -- Find or create window for the terminal
@@ -217,10 +216,10 @@ local function term_select()
         if #wins > 0 then
           vim.api.nvim_set_current_win(wins[1])
         else
-          vim.cmd('botright split')
+          vim.cmd 'botright split'
           vim.api.nvim_set_current_buf(choice.buf)
         end
-        vim.cmd('startinsert')
+        vim.cmd 'startinsert'
       end
     end)
   else
@@ -228,13 +227,13 @@ local function term_select()
     local items = {}
     local buf_map = {}
     for i, term in ipairs(term_bufs) do
-      local display = string.format("%d: %s (pid: %s)", i, vim.fn.fnamemodify(term.name, ":t"), term.pid or "?")
+      local display = string.format('%d: %s (pid: %s)', i, vim.fn.fnamemodify(term.name, ':t'), term.pid or '?')
       table.insert(items, display)
       buf_map[display] = term.buf
     end
 
     vim.ui.select(items, {
-      prompt = "Select Terminal:",
+      prompt = 'Select Terminal:',
     }, function(choice)
       if choice then
         local buf = buf_map[choice]
@@ -242,10 +241,10 @@ local function term_select()
         if #wins > 0 then
           vim.api.nvim_set_current_win(wins[1])
         else
-          vim.cmd('botright split')
+          vim.cmd 'botright split'
           vim.api.nvim_set_current_buf(buf)
         end
-        vim.cmd('startinsert')
+        vim.cmd 'startinsert'
       end
     end)
   end
@@ -257,30 +256,30 @@ end
 local function term_send(text, term_buf)
   local term_bufs = get_terminal_buffers()
   if #term_bufs == 0 then
-    vim.notify("No terminals open", vim.log.levels.WARN)
+    vim.notify('No terminals open', vim.log.levels.WARN)
     return
   end
 
   local buf = term_buf or term_bufs[1].buf
   local job_id = vim.b[buf].terminal_job_id
   if job_id then
-    vim.fn.chansend(job_id, text .. "\n")
+    vim.fn.chansend(job_id, text .. '\n')
   end
 end
 
 --- Change current buffer to vertical split
 local function change_to_vsplit()
   local buf = vim.api.nvim_get_current_buf()
-  vim.cmd('close')
-  vim.cmd('vsplit')
+  vim.cmd 'close'
+  vim.cmd 'vsplit'
   vim.api.nvim_set_current_buf(buf)
 end
 
 --- Change current buffer to horizontal split
 local function change_to_hsplit()
   local buf = vim.api.nvim_get_current_buf()
-  vim.cmd('close')
-  vim.cmd('split')
+  vim.cmd 'close'
+  vim.cmd 'split'
   vim.api.nvim_set_current_buf(buf)
 end
 
@@ -290,50 +289,50 @@ end
 
 -- :TermNew [pos=position] [name=name] - Open new terminal
 vim.api.nvim_create_user_command('TermNew', function(cmd_opts)
-  local position = "bottom"
+  local position = 'bottom'
   local name = nil
   -- Parse named arguments like pos=float name=somename
   for _, arg in ipairs(cmd_opts.fargs) do
-    local key, value = arg:match("^(%w+)=(.+)$")
+    local key, value = arg:match '^(%w+)=(.+)$'
     if key and value then
-      if key == "pos" or key == "position" then
+      if key == 'pos' or key == 'position' then
         position = value
-      elseif key == "name" then
+      elseif key == 'name' then
         name = value
       end
-    elseif not arg:match("=") then
+    elseif not arg:match '=' then
       -- Fallback: treat bare argument as position for backward compat
       position = arg
     end
   end
-  term_new({ position = position, name = name })
+  term_new { position = position, name = name }
 end, {
   nargs = '*',
   complete = function(_, cmdline)
     local args = vim.split(cmdline, '%s+')
-    local last = args[#args] or ""
-    if last:match("^pos=") then
+    local last = args[#args] or ''
+    if last:match '^pos=' then
       return { 'pos=bottom', 'pos=right', 'pos=left', 'pos=top', 'pos=float' }
-    elseif last:match("^name=") then
+    elseif last:match '^name=' then
       return {}
     else
       return { 'pos=', 'name=' }
     end
   end,
-  desc = 'Open new terminal. Usage: :TermNew [pos=position] [name=name]'
+  desc = 'Open new terminal. Usage: :TermNew [pos=position] [name=name]',
 })
 
 -- :TermSelect - Pick from open terminals
 vim.api.nvim_create_user_command('TermSelect', function()
   term_select()
 end, {
-  desc = 'Select from open terminals'
+  desc = 'Select from open terminals',
 })
 
 -- :TermToggle [num] [position] - Toggle numbered terminal (like ToggleTerm)
 vim.api.nvim_create_user_command('TermToggle', function(cmd_opts)
   local num = tonumber(cmd_opts.fargs[1]) or 1
-  local position = cmd_opts.fargs[2] or "bottom"
+  local position = cmd_opts.fargs[2] or 'bottom'
   toggle_terminal(num, position)
 end, {
   nargs = '*',
@@ -345,7 +344,7 @@ end, {
       return { 'bottom', 'right', 'left', 'top', 'float' }
     end
   end,
-  desc = 'Toggle numbered terminal. Usage: :TermToggle [num] [position]'
+  desc = 'Toggle numbered terminal. Usage: :TermToggle [num] [position]',
 })
 
 -- :TermSend [text] - Send text to terminal
@@ -353,31 +352,31 @@ vim.api.nvim_create_user_command('TermSend', function(cmd_opts)
   term_send(cmd_opts.args)
 end, {
   nargs = '+',
-  desc = 'Send text to terminal'
+  desc = 'Send text to terminal',
 })
 
 -- :TermList - List all terminals
 vim.api.nvim_create_user_command('TermList', function()
   local term_bufs = get_terminal_buffers()
   if #term_bufs == 0 then
-    vim.notify("No terminals open", vim.log.levels.INFO)
+    vim.notify('No terminals open', vim.log.levels.INFO)
     return
   end
   for i, term in ipairs(term_bufs) do
-    print(string.format("%d: buf=%d pid=%s %s", i, term.buf, term.pid or "?", vim.fn.fnamemodify(term.name, ":t")))
+    print(string.format('%d: buf=%d pid=%s %s', i, term.buf, term.pid or '?', vim.fn.fnamemodify(term.name, ':t')))
   end
 end, {
-  desc = 'List all open terminals'
+  desc = 'List all open terminals',
 })
 
 -- :Cvsplit - Change current buffer to vertical split
 vim.api.nvim_create_user_command('Cvsplit', change_to_vsplit, {
-  desc = 'Change current buffer to vertical split'
+  desc = 'Change current buffer to vertical split',
 })
 
 -- :Chsplit - Change current buffer to horizontal split
 vim.api.nvim_create_user_command('Chsplit', change_to_hsplit, {
-  desc = 'Change current buffer to horizontal split'
+  desc = 'Change current buffer to horizontal split',
 })
 
 --show kepbindings with whichkey
@@ -389,9 +388,9 @@ wk.add({
   { '<c-LeftMouse>', '<cmd>lua vim.lsp.buf.definition()<CR>', desc = 'go to definition' },
   { '<c-q>', '<cmd>q<cr>', desc = 'close buffer' },
   { '<esc>', '<cmd>noh<cr>', desc = 'remove search highlight' },
-  { 'gf', ':e <cfile><CR>', desc = 'edit file' },
-  { '<C-M-i>', insert_py_chunk, desc = 'python code chunk' },
-  { '<m-I>', insert_py_chunk, desc = 'python code chunk' },
+  -- { 'gf', ':e <cfile><CR>', desc = 'edit file' },
+  -- { '<C-M-i>', insert_py_chunk, desc = 'python code chunk' },
+  -- { '<m-I>', insert_py_chunk, desc = 'python code chunk' },
   { ']q', ':silent cnext<cr>', desc = '[q]uickfix next' },
   { '[q', ':silent cprev<cr>', desc = '[q]uickfix prev' },
   { 'z?', ':setlocal spell!<cr>', desc = 'toggle [z]pellcheck' },
@@ -400,8 +399,8 @@ wk.add({
 
 -- visual mode
 wk.add({
-  { '<M-j>', "ddp", desc = 'move line down' },
-  { '<M-k>', "ddkkp", desc = 'move line up' },
+  { '<M-j>', 'ddp', desc = 'move line down' },
+  { '<M-k>', 'ddkkp', desc = 'move line up' },
   { '.', ':norm .<cr>', desc = 'repeat last normal mode command' },
   { '<C-q>', ':norm @q<cr>', desc = 'repeat q macro' },
 }, { mode = 'v' })
@@ -425,11 +424,9 @@ local function new_terminal_python()
   new_terminal 'uv run python'
 end
 
-
 local function new_terminal_ipython()
   new_terminal 'uv tool run ipython --no-confirm-exit'
 end
-
 
 -- normal mode with <leader>
 wk.add({
@@ -443,70 +440,218 @@ wk.add({
   { '<leader>s', group = '[s]earch' },
   { '<leader>m', group = '[m]isc' },
   { '<leader>b', group = '[b]uffer' },
-  { '<leader>ff', function() require('misc.pickers').find_files() end, desc = '[f]iles' },
-  { '<leader>fh', function() require('misc.pickers').help_tags() end, desc = '[h]elp' },
-  { '<leader>fk', function() require('misc.pickers').keymaps() end, desc = '[k]eymaps' },
-  { '<leader>fg', function() require('misc.pickers').live_grep() end, desc = '[g]rep' },
-  { '<leader>fb', function() require('misc.pickers').current_buffer_fuzzy_find() end, desc = '[b]uffer fuzzy find' },
-  { '<leader>fm', function() require('misc.pickers').marks() end, desc = '[m]arks' },
-  { '<leader>fM', function() require('misc.pickers').man_pages() end, desc = '[M]an pages' },
-  { '<leader>fc', function() require('misc.pickers').git_commits() end, desc = 'git [c]ommits' },
-  { '<leader>f<space>', function() require('misc.pickers').buffers() end, desc = '[ ] buffers' },
-  { '<leader>fd', function() require('misc.pickers').buffers() end, desc = '[d] buffers' },
-  { '<leader>fq', function() require('misc.pickers').quickfix() end, desc = '[q]uickfix' },
-  { '<leader>fl', function() require('misc.pickers').loclist() end, desc = '[l]oclist' },
-  { '<leader>fj', function() require('misc.pickers').jumplist() end, desc = '[j]umplist' },
+  {
+    '<leader>ff',
+    function()
+      require('misc.pickers').find_files()
+    end,
+    desc = '[f]iles',
+  },
+  {
+    '<leader>fh',
+    function()
+      require('misc.pickers').help_tags()
+    end,
+    desc = '[h]elp',
+  },
+  {
+    '<leader>fk',
+    function()
+      require('misc.pickers').keymaps()
+    end,
+    desc = '[k]eymaps',
+  },
+  {
+    '<leader>fg',
+    function()
+      require('misc.pickers').live_grep()
+    end,
+    desc = '[g]rep',
+  },
+  {
+    '<leader>fb',
+    function()
+      require('misc.pickers').current_buffer_fuzzy_find()
+    end,
+    desc = '[b]uffer fuzzy find',
+  },
+  {
+    '<leader>fm',
+    function()
+      require('misc.pickers').marks()
+    end,
+    desc = '[m]arks',
+  },
+  {
+    '<leader>fM',
+    function()
+      require('misc.pickers').man_pages()
+    end,
+    desc = '[M]an pages',
+  },
+  {
+    '<leader>fc',
+    function()
+      require('misc.pickers').git_commits()
+    end,
+    desc = 'git [c]ommits',
+  },
+  {
+    '<leader>f<space>',
+    function()
+      require('misc.pickers').buffers()
+    end,
+    desc = '[ ] buffers',
+  },
+  {
+    '<leader>fd',
+    function()
+      require('misc.pickers').buffers()
+    end,
+    desc = '[d] buffers',
+  },
+  {
+    '<leader>fq',
+    function()
+      require('misc.pickers').quickfix()
+    end,
+    desc = '[q]uickfix',
+  },
+  {
+    '<leader>fl',
+    function()
+      require('misc.pickers').loclist()
+    end,
+    desc = '[l]oclist',
+  },
+  {
+    '<leader>fj',
+    function()
+      require('misc.pickers').jumplist()
+    end,
+    desc = '[j]umplist',
+  },
+  {
+    '<leader>fz',
+    function()
+      vim.cmd 'Telescope zoxide'
+    end,
+    desc = '[z]oxide dirs',
+  },
 
   -- Snacks-enhanced pickers (use Snacks if available, else fall back)
-  { '<leader>su', function()
-      local ok,s = pcall(require, 'snacks.picker')
-      if ok and s and s.undo then pcall(s.undo) else vim.notify('Undo picker not available', vim.log.levels.WARN) end
-    end, desc = 'Undo history' },
-  { '<leader>sd', function()
-      local ok,s = pcall(require, 'snacks.picker')
-      if ok and s and s.diagnostics then pcall(s.diagnostics) else
-        local ok2, tb = pcall(require, 'telescope.builtin')
-        if ok2 and tb and tb.diagnostics then tb.diagnostics() else vim.diagnostic.setqflist({ open = true }) end
+  {
+    '<leader>su',
+    function()
+      local ok, s = pcall(require, 'snacks.picker')
+      if ok and s and s.undo then
+        pcall(s.undo)
+      else
+        vim.notify('Undo picker not available', vim.log.levels.WARN)
       end
-    end, desc = 'Diagnostics' },
-  { '<leader>s/', function()
-      local ok,s = pcall(require, 'snacks.picker')
-      if ok and s and s.search_history then pcall(s.search_history) else vim.notify('Search history not available', vim.log.levels.WARN) end
-    end, desc = 'Search History' },
-  { '<leader>sB', function()
-      local ok,s = pcall(require, 'snacks.picker')
-      if ok and s and s.grep_buffers then pcall(s.grep_buffers) else require('misc.pickers').current_buffer_fuzzy_find() end
-    end, desc = 'Grep Open Buffers' },
-  { '<leader>sw', function()
-      local ok,s = pcall(require, 'snacks.picker')
-      if ok and s and s.grep_word then pcall(s.grep_word) else require('misc.pickers').live_grep() end
-    end, desc = 'Grep word/selection', mode = { 'n', 'x' } },
+    end,
+    desc = 'Undo history',
+  },
+  {
+    '<leader>sd',
+    function()
+      local ok, s = pcall(require, 'snacks.picker')
+      if ok and s and s.diagnostics then
+        pcall(s.diagnostics)
+      else
+        local ok2, tb = pcall(require, 'telescope.builtin')
+        if ok2 and tb and tb.diagnostics then
+          tb.diagnostics()
+        else
+          vim.diagnostic.setqflist { open = true }
+        end
+      end
+    end,
+    desc = 'Diagnostics',
+  },
+  {
+    '<leader>s/',
+    function()
+      local ok, s = pcall(require, 'snacks.picker')
+      if ok and s and s.search_history then
+        pcall(s.search_history)
+      else
+        vim.notify('Search history not available', vim.log.levels.WARN)
+      end
+    end,
+    desc = 'Search History',
+  },
+  {
+    '<leader>sB',
+    function()
+      local ok, s = pcall(require, 'snacks.picker')
+      if ok and s and s.grep_buffers then
+        pcall(s.grep_buffers)
+      else
+        require('misc.pickers').current_buffer_fuzzy_find()
+      end
+    end,
+    desc = 'Grep Open Buffers',
+  },
+  {
+    '<leader>sw',
+    function()
+      local ok, s = pcall(require, 'snacks.picker')
+      if ok and s and s.grep_word then
+        pcall(s.grep_word)
+      else
+        require('misc.pickers').live_grep()
+      end
+    end,
+    desc = 'Grep word/selection',
+    mode = { 'n', 'x' },
+  },
 
   { '<leader>g', group = '[g]it' },
   { '<leader>gc', group = '[c]onflict' },
   { '<leader>gcr', ':GitConflictRefresh<cr>', desc = '[r]efresh' },
-  { '<leader>gcl', function()
-    vim.cmd('GitConflictRefresh')
-    vim.schedule(function()
-      vim.cmd('GitConflictListQf')
-      -- GitConflictListQf silently does nothing when no conflicts found
-      if #vim.fn.getqflist() == 0 then
-        vim.notify('No merge conflicts found', vim.log.levels.INFO)
-      end
-    end)
-  end, desc = '[l]ist in quickfix' },
+  {
+    '<leader>gcl',
+    function()
+      vim.cmd 'GitConflictRefresh'
+      vim.schedule(function()
+        vim.cmd 'GitConflictListQf'
+        -- GitConflictListQf silently does nothing when no conflicts found
+        if #vim.fn.getqflist() == 0 then
+          vim.notify('No merge conflicts found', vim.log.levels.INFO)
+        end
+      end)
+    end,
+    desc = '[l]ist in quickfix',
+  },
   { '<leader>gco', ':GitConflictChooseOurs<cr>', desc = 'choose [o]urs' },
   { '<leader>gct', ':GitConflictChooseTheirs<cr>', desc = 'choose [t]heirs' },
   { '<leader>gcb', ':GitConflictChooseBoth<cr>', desc = 'choose [b]oth' },
   { '<leader>gcn', ':GitConflictChooseNone<cr>', desc = 'choose [n]one' },
   { '<leader>gc0', ':GitConflictChooseBase<cr>', desc = 'choose base [0]' },
   -- { '<leader>gs', ':Gitsigns<cr>', desc = 'git [s]igns' },
-  { '<leader>gm', function() require('misc.ai-commit').commit() end, desc = 'AI commit [m]essage' },
-  { '<leader>gM', function() require('misc.ai-commit').select_model() end, desc = 'Set AI [M]odel' },
+  {
+    '<leader>gm',
+    function()
+      require('misc.ai-commit').commit()
+    end,
+    desc = 'AI commit [m]essage',
+  },
+  {
+    '<leader>gM',
+    function()
+      require('misc.ai-commit').select_model()
+    end,
+    desc = 'Set AI [M]odel',
+  },
   -- lazygit keymaps are in snacks.lua: <leader>gg, <leader>gf, <leader>gl
-  { '<leader>td', function()
-      require('trouble').open('workspace_diagnostics')
-    end, desc = 'Trouble: Workspace Diagnostics' },
+  {
+    '<leader>td',
+    function()
+      require('trouble').open 'workspace_diagnostics'
+    end,
+    desc = 'Trouble: Workspace Diagnostics',
+  },
   { '<leader>gwc', ":lua require('telescope').extensions.git_worktree.create_git_worktree()<cr>", desc = 'worktree create' },
   { '<leader>gws', ":lua require('telescope').extensions.git_worktree.git_worktrees()<cr>", desc = 'worktree switch' },
   { '<leader>gd', group = '[d]iff' },
@@ -545,14 +690,30 @@ wk.add({
     desc = '[d]isable',
   },
   { '<leader>lde', vim.diagnostic.enable, desc = '[e]nable' },
-  { '<leader>ss', function()
-      local ok,s = pcall(require, 'snacks.picker')
-      if ok and s and s.lsp_symbols then pcall(s.lsp_symbols) else vim.lsp.buf.document_symbol() end
-    end, desc = 'LSP Symbols' },
-  { '<leader>sS', function()
-      local ok,s = pcall(require, 'snacks.picker')
-      if ok and s and s.lsp_workspace_symbols then pcall(s.lsp_workspace_symbols) else vim.lsp.buf.workspace_symbol() end
-    end, desc = 'LSP Workspace Symbols' },
+  {
+    '<leader>ss',
+    function()
+      local ok, s = pcall(require, 'snacks.picker')
+      if ok and s and s.lsp_symbols then
+        pcall(s.lsp_symbols)
+      else
+        vim.lsp.buf.document_symbol()
+      end
+    end,
+    desc = 'LSP Symbols',
+  },
+  {
+    '<leader>sS',
+    function()
+      local ok, s = pcall(require, 'snacks.picker')
+      if ok and s and s.lsp_workspace_symbols then
+        pcall(s.lsp_workspace_symbols)
+      else
+        vim.lsp.buf.workspace_symbol()
+      end
+    end,
+    desc = 'LSP Workspace Symbols',
+  },
   { '<leader>v', group = '[v]im' },
   { '<leader>vl', ':Lazy<cr>', desc = '[l]azy package manager' },
   { '<leader>vm', ':Mason<cr>', desc = '[m]ason software installer' },
@@ -566,14 +727,50 @@ wk.add({
   { '<leader>D', group = '[D]atabase' },
   { '<leader>st', ':Store<cr>', desc = 'Open Store' },
   { '<leader>t', group = '[t]erminal' },
-  { '<leader>tn', function() term_new({ position = 'bottom' }) end, desc = '[n]ew terminal (bottom)' },
-  { '<leader>tv', function() term_new({ position = 'right' }) end, desc = 'new terminal [v]ertical (right)' },
-  { '<leader>tf', function() term_new({ position = 'float' }) end, desc = 'new terminal [f]loat' },
+  {
+    '<leader>tn',
+    function()
+      term_new { position = 'bottom' }
+    end,
+    desc = '[n]ew terminal (bottom)',
+  },
+  {
+    '<leader>tv',
+    function()
+      term_new { position = 'right' }
+    end,
+    desc = 'new terminal [v]ertical (right)',
+  },
+  {
+    '<leader>tf',
+    function()
+      term_new { position = 'float' }
+    end,
+    desc = 'new terminal [f]loat',
+  },
   { '<leader>ts', term_select, desc = '[s]elect terminal' },
   { '<leader>tl', ':TermList<cr>', desc = '[l]ist terminals' },
-  { '<leader>t1', function() toggle_terminal(1) end, desc = 'toggle terminal [1]' },
-  { '<leader>t2', function() toggle_terminal(2) end, desc = 'toggle terminal [2]' },
-  { '<leader>t3', function() toggle_terminal(3) end, desc = 'toggle terminal [3]' },
+  {
+    '<leader>t1',
+    function()
+      toggle_terminal(1)
+    end,
+    desc = 'toggle terminal [1]',
+  },
+  {
+    '<leader>t2',
+    function()
+      toggle_terminal(2)
+    end,
+    desc = 'toggle terminal [2]',
+  },
+  {
+    '<leader>t3',
+    function()
+      toggle_terminal(3)
+    end,
+    desc = 'toggle terminal [3]',
+  },
   { '<leader>wv', change_to_vsplit, desc = 'change to [v]ertical split' },
   { '<leader>wh', change_to_hsplit, desc = 'change to [h]orizontal split' },
 }, { mode = 'n' })

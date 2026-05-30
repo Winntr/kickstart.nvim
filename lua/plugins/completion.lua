@@ -8,11 +8,12 @@ return {
     end,
   },
   {
-      'jmbuhr/otter.nvim',
-      dependencies = {
-        'nvim-treesitter/nvim-treesitter',
-      },
-      opts = {},
+    'jmbuhr/otter.nvim',
+    lazy = true,
+    dependencies = {
+      'nvim-treesitter/nvim-treesitter',
+    },
+    opts = {},
   },
   { -- completion
     'hrsh7th/nvim-cmp',
@@ -27,7 +28,7 @@ return {
       'saadparwaiz1/cmp_luasnip',
       'f3fora/cmp-spell',
       'ray-x/cmp-treesitter',
-      'kdheepak/cmp-latex-symbols',
+      -- 'kdheepak/cmp-latex-symbols',
       'jmbuhr/cmp-pandoc-references',
       'L3MON4D3/LuaSnip',
       'rafamadriz/friendly-snippets',
@@ -141,7 +142,6 @@ return {
           { name = 'calc' },
           { name = 'latex_symbols' },
           { name = 'emoji' },
-
         },
         view = {
           entries = 'native',

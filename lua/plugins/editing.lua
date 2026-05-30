@@ -1,7 +1,7 @@
 return {
 
   -- disables hungry features for files larget than 2MB
-  { 'LunarVim/bigfile.nvim', event = 'BufReadPre' },
+  -- { 'LunarVim/bigfile.nvim', event = 'BufReadPre' },
 
   -- add/delete/change can be done with the keymaps
   -- ys{motion}{char}, ds{char}, and cs{target}{replacement}
@@ -73,11 +73,28 @@ return {
     'MagicDuck/grug-far.nvim',
     cmd = 'GrugFar',
     keys = {
-      { '<leader>sr', function() require('grug-far').open() end, desc = 'Search and [r]eplace (grug-far)' },
-      { '<leader>srw', function() require('grug-far').open({ prefills = { search = vim.fn.expand('<cword>') } }) end, desc = 'Search [w]ord (grug-far)' },
-      { '<leader>sr', function()
-          require('grug-far').open({ prefills = { search = vim.fn.expand('<cword>') } })
-        end, desc = 'Search selection (grug-far)', mode = 'v' },
+      {
+        '<leader>sr',
+        function()
+          require('grug-far').open()
+        end,
+        desc = 'Search and [r]eplace (grug-far)',
+      },
+      {
+        '<leader>srw',
+        function()
+          require('grug-far').open { prefills = { search = vim.fn.expand '<cword>' } }
+        end,
+        desc = 'Search [w]ord (grug-far)',
+      },
+      {
+        '<leader>sr',
+        function()
+          require('grug-far').open { prefills = { search = vim.fn.expand '<cword>' } }
+        end,
+        desc = 'Search selection (grug-far)',
+        mode = 'v',
+      },
     },
     opts = {
       headerMaxWidth = 80,
@@ -144,7 +161,13 @@ return {
       { 'P', '<Plug>(YankyPutBefore)', mode = { 'n', 'x' }, desc = 'Put yanked text before cursor' },
       { '<c-p>', '<Plug>(YankyPreviousEntry)', desc = 'Select previous yank entry' },
       { '<c-n>', '<Plug>(YankyNextEntry)', desc = 'Select next yank entry' },
-      { '<leader>fy', function() require('telescope').extensions.yank_history.yank_history() end, desc = '[y]ank history' },
+      {
+        '<leader>fy',
+        function()
+          require('telescope').extensions.yank_history.yank_history()
+        end,
+        desc = '[y]ank history',
+      },
     },
   },
 
@@ -157,11 +180,45 @@ return {
     },
     lazy = true,
     keys = {
-      { '<leader>cre', function() require('refactoring').refactor('Extract Function') end, desc = '[e]xtract function', mode = 'x' },
-      { '<leader>crv', function() require('refactoring').refactor('Extract Variable') end, desc = 'extract [v]ariable', mode = 'x' },
-      { '<leader>cri', function() require('refactoring').refactor('Inline Variable') end, desc = '[i]nline variable', mode = { 'n', 'x' } },
-      { '<leader>crb', function() require('refactoring').refactor('Extract Block') end, desc = 'extract [b]lock' },
-      { '<leader>crr', function() require('telescope').extensions.refactoring.refactors() end, desc = '[r]efactor picker', mode = { 'n', 'x' } },
+      {
+        '<leader>cre',
+        function()
+          require('refactoring').refactor 'Extract Function'
+        end,
+        desc = '[e]xtract function',
+        mode = 'x',
+      },
+      {
+        '<leader>crv',
+        function()
+          require('refactoring').refactor 'Extract Variable'
+        end,
+        desc = 'extract [v]ariable',
+        mode = 'x',
+      },
+      {
+        '<leader>cri',
+        function()
+          require('refactoring').refactor 'Inline Variable'
+        end,
+        desc = '[i]nline variable',
+        mode = { 'n', 'x' },
+      },
+      {
+        '<leader>crb',
+        function()
+          require('refactoring').refactor 'Extract Block'
+        end,
+        desc = 'extract [b]lock',
+      },
+      {
+        '<leader>crr',
+        function()
+          require('telescope').extensions.refactoring.refactors()
+        end,
+        desc = '[r]efactor picker',
+        mode = { 'n', 'x' },
+      },
     },
     opts = {},
   },

@@ -37,10 +37,11 @@ return {
     },
     opts = {
       provider = 'copilot',
+      model = 'gpt-5-mini',
     },
     keys = {
       {
-        '<leader>wd',
+        '<leader>awd',
         mode = { 'n', 'x' },
         function()
           require('wtf').diagnose()
@@ -48,7 +49,7 @@ return {
         desc = 'Debug diagnostic with AI',
       },
       {
-        '<leader>wf',
+        '<leader>awf',
         mode = { 'n', 'x' },
         function()
           require('wtf').fix()
@@ -56,7 +57,7 @@ return {
         desc = 'Fix diagnostic with AI',
       },
       {
-        '<leader>ws',
+        '<leader>aws',
         mode = { 'n' },
         function()
           require('wtf').search()
@@ -64,7 +65,7 @@ return {
         desc = 'Search diagnostic with Google',
       },
       {
-        '<leader>wh',
+        '<leader>awh',
         mode = { 'n' },
         function()
           require('wtf').history()
@@ -81,8 +82,8 @@ return {
     },
     opts = {
       interactions = {
-        chat = { adapter = 'cursor_cli' },
-        inline = { adapter = 'cursor_cli' },
+        chat = { adapter = 'copilot', model = 'gpt-5.4-mini' },
+        inline = { adapter = 'copilot', model = 'gpt-5-mini' },
       },
       adapters = {
         opts = {
@@ -125,6 +126,7 @@ return {
         ['cursor-acp'] = {
           -- Neovim on Windows often requires the exact extension ( .cmd or .exe ) to find the executable, even if it's on the PATH. Adjust as needed for your OS and installation method.
           command = vim.fn.has 'win32' == 1 and 'agent.cmd' or 'agent',
+          initial_model = require('custom.cursor_agent').ACP_VARIANT_COMPOSER_25,
         },
       },
     },
@@ -186,17 +188,21 @@ return {
     'ThePrimeagen/99',
     config = function()
       local _99 = require '99'
+      local cursor_99_provider = require 'custom.patches.99'
 
       -- For logging that is to a file if you wish to trace through requests
       -- for reporting bugs, i would not rely on this, but instead the provided
       -- logging mechanisms within 99.  This is for more debugging purposes
       local cwd = vim.uv.cwd()
       local basename = vim.fs.basename(cwd)
+      local log_path = vim.fs.joinpath(vim.fn.stdpath 'state', '99', basename .. '.debug.log')
       _99.setup {
-        -- provider = _99.Providers.ClaudeCodeProvider,  -- default: OpenCodeProvider
+        -- provider = cursor_99_provider,
+        -- model = 'composer-2',
         logger = {
           level = _99.DEBUG,
-          path = '/tmp/' .. basename .. '.99.debug',
+          type = 'file',
+          path = log_path,
           print_on_error = true,
         },
         -- When setting this to something that is not inside the CWD tools
@@ -204,6 +210,7 @@ return {
         -- and generation will fail refer to tool documentation to resolve
         -- https://opencode.ai/docs/permissions/#external-directories
         -- https://code.claude.com/docs/en/permissions#read-and-edit
+        display_errors = true,
         tmp_dir = './tmp',
 
         --- Completions: #rules and @files in the prompt buffer
@@ -280,5 +287,45 @@ return {
         _99.search()
       end)
     end,
+  },
+  {
+    'pablopunk/pi.nvim',
+    provider = 'copilot',
+    model = 'gpt-5.4-mini',
+    thinking = 'low',
+    skills = true,
+    extensions = true,
+
+    --- Pi.nvim `keys`: each entry's first string is the map LHS (what you press); the second is
+    --- the RHS (usually `<cmd>...<cr>`). The `<leader>ap*` sequences below are examples only—swap
+    --- them for chords that fit your layout and do not collide with other Lazy/LSP/which-key maps.
+    --- `mode` is passed through to `vim.keymap.set`; `desc` is shown in which-key and similar UIs
+    --- (see `:help map-which-key` for integrating descriptions with your picker).
+    keys = {
+      {
+        '<leader>apa',
+        '<cmd>PiAsk<cr>',
+        mode = 'n',
+        desc = 'Ask Pi coding agent',
+      },
+      {
+        '<leader>aps',
+        '<cmd>PiAskSelection<cr>',
+        mode = 'v',
+        desc = 'Ask Pi about visual selection',
+      },
+      {
+        '<leader>apc',
+        '<cmd>PiCancel<cr>',
+        mode = 'n',
+        desc = 'Cancel Pi agent request',
+      },
+      {
+        '<leader>apl',
+        '<cmd>PiLog<cr>',
+        mode = 'n',
+        desc = 'Open Pi agent session log',
+      },
+    },
   },
 }

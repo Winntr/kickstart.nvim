@@ -1,32 +1,33 @@
 return {
   {
-    "kevinhwang91/nvim-ufo",
-    dependencies = { "kevinhwang91/promise-async" },
-    event = "VeryLazy",
+    'kevinhwang91/nvim-ufo',
+    enabled = false,
+    dependencies = { 'kevinhwang91/promise-async' },
+    event = 'VeryLazy',
     keys = {
       {
-        "zR",
+        'zR',
         function()
-          require("ufo").openAllFolds()
+          require('ufo').openAllFolds()
         end,
-        desc = "Open all folds",
+        desc = 'Open all folds',
       },
       {
-        "zM",
+        'zM',
         function()
-          require("ufo").closeAllFolds()
+          require('ufo').closeAllFolds()
         end,
-        desc = "Close all folds",
+        desc = 'Close all folds',
       },
       {
-        "zK",
+        'zK',
         function()
-          local winid = require("ufo").peekFoldedLinesUnderCursor()
+          local winid = require('ufo').peekFoldedLinesUnderCursor()
           if not winid then
             vim.lsp.buf.hover()
           end
         end,
-        desc = "Peek fold preview",
+        desc = 'Peek fold preview',
       },
     },
     opts = {
@@ -34,17 +35,17 @@ return {
         -- ufo only allows {main, fallback} — exactly 2 providers
         -- Use treesitter+indent for filetypes without good LSP folding,
         -- and lsp+indent everywhere else (indent is the safe universal fallback)
-        local ts_only = { "markdown", "text", "log", "help", "" }
+        local ts_only = { 'markdown', 'text', 'log', 'help', '' }
         for _, ft in ipairs(ts_only) do
           if filetype == ft then
-            return { "treesitter", "indent" }
+            return { 'treesitter', 'indent' }
           end
         end
-        return { "lsp", "indent" }
+        return { 'lsp', 'indent' }
       end,
       fold_virt_text_handler = function(virtText, lnum, endLnum, width, truncate)
         local newVirtText = {}
-        local suffix = ("  %d lines"):format(endLnum - lnum)
+        local suffix = ('  %d lines'):format(endLnum - lnum)
         local sufWidth = vim.fn.strdisplaywidth(suffix)
         local targetWidth = width - sufWidth
         local curWidth = 0
@@ -60,24 +61,24 @@ return {
             table.insert(newVirtText, { chunkText, hlGroup })
             chunkWidth = vim.fn.strdisplaywidth(chunkText)
             if curWidth + chunkWidth < targetWidth then
-              suffix = suffix .. (" "):rep(targetWidth - curWidth - chunkWidth)
+              suffix = suffix .. (' '):rep(targetWidth - curWidth - chunkWidth)
             end
             break
           end
           curWidth = curWidth + chunkWidth
         end
 
-        table.insert(newVirtText, { suffix, "MoreMsg" })
+        table.insert(newVirtText, { suffix, 'MoreMsg' })
         return newVirtText
       end,
     },
     config = function(_, opts)
-      vim.o.foldcolumn = "1"
+      vim.o.foldcolumn = '1'
       vim.o.foldlevel = 99
       vim.o.foldlevelstart = 99
       vim.o.foldenable = true
 
-      require("ufo").setup(opts)
+      require('ufo').setup(opts)
     end,
   },
 }

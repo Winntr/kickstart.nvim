@@ -40,6 +40,10 @@ elseif vim.loop.os_uname().sysname == 'Linux' then
   -- }
 end
 
+vim.opt.shiftwidth = 4
+vim.opt.tabstop = 4
+vim.expandtab = true
+
 vim.opt.breakindent = true
 vim.opt.wrap = false
 vim.opt.undofile = true
@@ -127,6 +131,8 @@ vim.api.nvim_create_autocmd({ 'BufRead', 'BufNewFile' }, {
 -- [[ Load non-plugin config files ]]
 require 'config.global'
 require 'config.autocommands'
+require 'misc.terminal'
+
 -- [[ Set the runtime path for Neovim ]]
 -- vim.g.python3_host_prog = vim.fn.expand("~/.local/share/nvim/venv/bin/python")
 -- Check if the venv exists before setting it (handle both Unix and Windows paths)

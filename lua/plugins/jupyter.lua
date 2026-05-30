@@ -4,6 +4,7 @@ return {
   -- Molten: Interactive code execution with Jupyter kernels
   {
     'benlubas/molten-nvim',
+    lazy = true,
     version = '^1.0.0', -- use version <2.0.0 to avoid breaking changes
     build = ':UpdateRemotePlugins',
     init = function()
@@ -133,40 +134,40 @@ return {
   },
 
   -- Quarto: LSP features in code blocks + code runner integration
-  {
-    'quarto-dev/quarto-nvim',
-    dependencies = {
-      'jmbuhr/otter.nvim', -- You already have this
-      'nvim-treesitter/nvim-treesitter',
-    },
-    ft = { 'quarto', 'markdown' },
-    config = function()
-      local quarto = require 'quarto'
-      quarto.setup {
-        lspFeatures = {
-          languages = { 'python', 'r', 'julia', 'lua' },
-          chunks = 'all',
-          diagnostics = {
-            enabled = true,
-            triggers = { 'BufWritePost' },
-          },
-          completion = {
-            enabled = true,
-          },
-        },
-        codeRunner = {
-          enabled = true,
-          default_method = 'molten',
-        },
-      }
-
-      -- Quarto runner keymaps
-      local runner = require 'quarto.runner'
-      vim.keymap.set('n', '<leader>jc', runner.run_cell, { desc = 'Jupyter: Run cell', silent = true })
-      vim.keymap.set('n', '<leader>ja', runner.run_above, { desc = 'Jupyter: Run cell and above', silent = true })
-      vim.keymap.set('n', '<leader>jA', runner.run_all, { desc = 'Jupyter: Run all cells', silent = true })
-      vim.keymap.set('n', '<leader>jb', runner.run_below, { desc = 'Jupyter: Run cell and below', silent = true })
-      vim.keymap.set('v', '<leader>jr', runner.run_range, { desc = 'Jupyter: Run visual range', silent = true })
-    end,
-  },
+  -- {
+  --   'quarto-dev/quarto-nvim',
+  --   dependencies = {
+  --     'jmbuhr/otter.nvim', -- You already have this
+  --     'nvim-treesitter/nvim-treesitter',
+  --   },
+  --   ft = { 'quarto', 'markdown' },
+  --   config = function()
+  --     local quarto = require 'quarto'
+  --     quarto.setup {
+  --       lspFeatures = {
+  --         languages = { 'python', 'r', 'julia', 'lua' },
+  --         chunks = 'all',
+  --         diagnostics = {
+  --           enabled = true,
+  --           triggers = { 'BufWritePost' },
+  --         },
+  --         completion = {
+  --           enabled = true,
+  --         },
+  --       },
+  --       codeRunner = {
+  --         enabled = true,
+  --         default_method = 'molten',
+  --       },
+  --     }
+  --
+  --     -- Quarto runner keymaps
+  --     local runner = require 'quarto.runner'
+  --     vim.keymap.set('n', '<leader>jc', runner.run_cell, { desc = 'Jupyter: Run cell', silent = true })
+  --     vim.keymap.set('n', '<leader>ja', runner.run_above, { desc = 'Jupyter: Run cell and above', silent = true })
+  --     vim.keymap.set('n', '<leader>jA', runner.run_all, { desc = 'Jupyter: Run all cells', silent = true })
+  --     vim.keymap.set('n', '<leader>jb', runner.run_below, { desc = 'Jupyter: Run cell and below', silent = true })
+  --     vim.keymap.set('v', '<leader>jr', runner.run_range, { desc = 'Jupyter: Run visual range', silent = true })
+  --   end,
+  -- },
 }

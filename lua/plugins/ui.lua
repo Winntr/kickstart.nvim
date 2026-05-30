@@ -8,6 +8,7 @@ return {
       { 'nvim-telescope/telescope-ui-select.nvim' },
       { 'nvim-telescope/telescope-fzf-native.nvim', build = 'make' },
       { 'nvim-telescope/telescope-dap.nvim' },
+      { 'jvgrootveld/telescope-zoxide' },
       {
         'jmbuhr/telescope-zotero.nvim',
         enabled = false,
@@ -105,6 +106,7 @@ return {
       telescope.load_extension 'fzf'
       telescope.load_extension 'ui-select'
       telescope.load_extension 'dap'
+      telescope.load_extension 'zoxide'
     end,
   },
 
@@ -415,32 +417,6 @@ return {
     end,
   },
 
-  { -- highlight markdown headings and code blocks etc.
-    'lukas-reineke/headlines.nvim',
-    enabled = false,
-    dependencies = 'nvim-treesitter/nvim-treesitter',
-    config = function()
-      require('headlines').setup {
-        markdown = {
-          query = vim.treesitter.query.parse(
-            'markdown',
-            [[
-                (fenced_code_block) @codeblock
-                ]]
-          ),
-          codeblock_highlight = 'CodeBlock',
-        },
-      }
-    end,
-    init = function()
-      require('vim.treesitter.query').add_predicate('is-mise?', function(_, _, bufnr, _)
-        local filepath = vim.api.nvim_buf_get_name(tonumber(bufnr) or 0)
-        local filename = vim.fn.fnamemodify(filepath, ':t')
-        return string.match(filename, '.*mise.*%.toml$') ~= nil
-      end, { force = true, all = false })
-    end,
-  },
-
   { -- render markdown with icons and formatting
     'MeanderingProgrammer/render-markdown.nvim',
     opts = {
@@ -466,6 +442,7 @@ return {
     '3rd/image.nvim',
     enabled = false,
     dev = false,
+    lazy = true,
     ft = { 'markdown', 'vimwiki' },
     config = function()
       -- Requirements
@@ -563,6 +540,7 @@ return {
   -- document outline / symbol sidebar
   {
     'stevearc/aerial.nvim',
+    lazy = true,
     dependencies = {
       'nvim-treesitter/nvim-treesitter',
       'nvim-tree/nvim-web-devicons',

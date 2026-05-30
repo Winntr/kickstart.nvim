@@ -6,3 +6,5 @@ nvim
 spell/
 lazy-lock.json
 Scripts/WezTermToggle/WeztermToggle.exe
+.pi
+custom-plugins/99

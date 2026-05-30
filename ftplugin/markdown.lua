@@ -8,10 +8,10 @@ vim.wo.breakindent = true
 vim.wo.showbreak = '|'
 
 -- Activate quarto for LSP features in code blocks (via otter.nvim)
-local ok, quarto = pcall(require, 'quarto')
-if ok then
-  quarto.activate()
-end
+-- local ok, quarto = pcall(require, 'quarto')
+-- if ok then
+--   quarto.activate()
+-- end
 
 -- Restore molten virt_text settings for notebooks (overrides python.lua settings)
 vim.schedule(function()
