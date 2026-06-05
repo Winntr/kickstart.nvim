@@ -1,3 +1,0 @@
--- NOTE: This file is no longer used.
--- lazy.nvim setup has been consolidated into init.lua
--- You can safely delete this file.

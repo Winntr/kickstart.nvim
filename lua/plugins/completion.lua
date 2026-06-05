@@ -148,7 +148,7 @@ return {
         },
         window = {
           documentation = {
-            border = require('misc.style').border,
+            -- border = require('misc.style').border,
           },
         },
       }

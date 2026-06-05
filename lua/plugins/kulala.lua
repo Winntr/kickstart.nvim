@@ -2,6 +2,7 @@
 -- Allows making REST, GraphQL, gRPC, and WebSocket requests from .http files
 return {
   'mistweaverco/kulala.nvim',
+  lazy = true,
   ft = { 'http', 'rest' },
   keys = {
     { '<leader>Rs', desc = 'HTTP: Send request' },
