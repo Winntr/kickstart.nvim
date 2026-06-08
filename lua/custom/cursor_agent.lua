@@ -40,6 +40,66 @@ function M.windows_cursor_agent_ps1()
   return nil
 end
 
+--- Latest Cursor Agent node entrypoint on Windows.
+--- @return string|nil node
+--- @return string|nil index_js
+function M.windows_node_entrypoint()
+  local base_path = vim.fn.expand '~/AppData/Local/cursor-agent/versions/'
+  local versions = {}
+  local uv = vim.uv or vim.loop
+  local req = uv.fs_scandir(base_path)
+
+  if req then
+    while true do
+      local name, entry_type = uv.fs_scandir_next(req)
+      if not name then
+        break
+      end
+
+      if entry_type == 'directory' and not name:match '%.zip$' then
+        local node = base_path .. name .. '/node.exe'
+        if vim.fn.filereadable(node) == 1 then
+          table.insert(versions, name)
+        end
+      end
+    end
+  end
+
+  if #versions == 0 then
+    return nil, nil
+  end
+
+  table.sort(versions)
+  local latest = versions[#versions]
+
+  return base_path .. latest .. '/node.exe', base_path .. latest .. '/index.js'
+end
+
+--- Provider config for agentic.nvim `cursor-acp`.
+--- On Windows, spawn node.exe directly with the `acp` subcommand. PowerShell and
+--- .cmd wrappers exit early under libuv stdio spawn and break ACP initialization.
+--- @return { command: string, args: string[], env?: table<string, string> }
+function M.agentic_acp_provider()
+  if is_windows() then
+    local node, index_js = M.windows_node_entrypoint()
+    if node and index_js then
+      return {
+        command = node,
+        args = { index_js, 'acp' },
+        env = {
+          CURSOR_INVOKED_AS = 'agent',
+          NODE_COMPILE_CACHE = vim.fn.expand '~/AppData/Local/cursor-compile-cache',
+        },
+      }
+    end
+  end
+
+  return {
+    command = 'cursor-agent',
+    args = { 'acp' },
+  }
+end
+
 --- argv prefix for spawning `agent` (PowerShell + ps1 on Windows when available).
 --- @return string[]
 function M.invocation_prefix()
