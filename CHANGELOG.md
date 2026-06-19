@@ -27,6 +27,9 @@
 - Fixed a Windows launch regression where Agentic used Cursor's internal `node.exe` entrypoint without the required `acp` subcommand, which could start the interactive CLI and spawn extra terminal tabs.
 - Fixed Mason startup error `Cannot find package "c3"` by excluding the custom C3 LSP from `mason-tool-installer` and using Mason registry package names for tool installation.
 - Fixed Avante `<leader>aM` / `<leader>am` crashes when the sidebar was not open by patching `acp_config_selector` to open the sidebar before ACP config selection.
+- Fixed Avante `Config.windows` nil crash by calling `require('avante').setup(opts)` from the lazy `config` hook (custom `config` disables lazy's auto-setup).
+- Registered Avante keymaps via lazy.nvim `keys` with `desc` so which-key discovers the `<leader>a` menu.
+- Fixed `No model options available from cursor-acp ACP agent` by falling back to `cursor-agent models` for `<leader>aM` and static Agent/Plan/Ask modes for `<leader>am` when Cursor ACP returns empty `configOptions`.
 
 ### Removed
 - C3 language support (LSP config, treesitter parser, filetypes, and custom highlight queries).

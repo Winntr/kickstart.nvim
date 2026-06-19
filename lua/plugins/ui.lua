@@ -34,7 +34,7 @@ return {
         { '<leader>x', group = 'Diagnostics' },
         { '<leader>c', group = 'Code' },
         { '<leader>s', group = 'Search' },
-        { '<leader>a', group = 'Avante' },
+        { '<leader>a', group = 'Avante', icon = '󰚩 ' },
         { '<leader>9', group = '99' },
         { '<leader>e', group = 'Explorer' },
         { '<leader>q', group = 'Quickfix' },

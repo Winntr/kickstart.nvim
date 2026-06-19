@@ -132,12 +132,14 @@ end
 --- Provider config for ACP clients (avante.nvim, agentic.nvim).
 --- On Windows, spawn node.exe directly with the `acp` subcommand. PowerShell and
 --- .cmd wrappers exit early under libuv stdio spawn and break ACP initialization.
+--- @param model_id? string Optional `--model` flag (Cursor often only honors this at ACP startup).
 --- @return { command: string, args: string[], env?: table<string, string> }
-function M.acp_provider()
+function M.acp_provider(model_id)
+  local entry
   if is_windows() then
     local node, index_js = M.windows_node_entrypoint()
     if node and index_js then
-      return {
+      entry = {
         command = node,
         args = { index_js, 'acp' },
         env = {
@@ -148,10 +150,28 @@ function M.acp_provider()
     end
   end
 
-  return {
-    command = 'cursor-agent',
-    args = { 'acp' },
-  }
+  if not entry then
+    entry = {
+      command = 'cursor-agent',
+      args = { 'acp' },
+    }
+  end
+
+  if model_id and model_id ~= '' then
+    local args = vim.deepcopy(entry.args)
+    local acp_idx = #args
+    for i, arg in ipairs(args) do
+      if arg == 'acp' then
+        acp_idx = i
+        break
+      end
+    end
+    table.insert(args, acp_idx, model_id)
+    table.insert(args, acp_idx, '--model')
+    entry.args = args
+  end
+
+  return entry
 end
 
 --- @deprecated Use acp_provider()
