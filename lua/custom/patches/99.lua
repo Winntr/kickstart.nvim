@@ -1,4 +1,5 @@
 local _99 = require '99'
+local cursor_agent = require 'custom.cursor_agent'
 
 local BaseProvider = _99.Providers.BaseProvider
 
@@ -15,53 +16,6 @@ local function once(fn)
   end
 end
 
-local function is_windows()
-  return vim.fn.has 'win32' == 1 or vim.fn.has 'win64' == 1
-end
-
---- Cursor CLI (`agent`), non-interactive `--print` mode. Replaces OpenCode routing
---- to cursor-acp; talks to Cursor directly (same stack as agentic.nvim `cursor-acp`).
-local function agent_bin()
-  return is_windows() and 'agent.cmd' or 'agent'
-end
-
---- `agent.cmd` runs `powershell -File cursor-agent.ps1 %*`. Cmd.exe parses the
---- generated command line before PowerShell sees it, so `<` / `>` in the prompt
---- can be treated as redirection and the user message is lost or truncated.
---- Launch `cursor-agent.ps1` via PowerShell with a proper argv list instead.
---- @return string|nil absolute path to cursor-agent.ps1 when resolvable
-local function windows_cursor_agent_ps1()
-  for _, exe in ipairs { 'agent.cmd', 'agent.ps1', 'agent' } do
-    local p = vim.fn.exepath(exe)
-    if p ~= '' then
-      local dir = vim.fn.fnamemodify(p, ':h')
-      local ps1 = vim.fs.joinpath(dir, 'cursor-agent.ps1')
-      if vim.fn.filereadable(ps1) == 1 then
-        return vim.fs.normalize(ps1)
-      end
-    end
-  end
-  return nil
-end
-
---- @return string[]
-local function agent_invocation_prefix()
-  if is_windows() then
-    local ps1 = windows_cursor_agent_ps1()
-    if ps1 then
-      return {
-        'powershell.exe',
-        '-NoProfile',
-        '-ExecutionPolicy',
-        'Bypass',
-        '-File',
-        ps1,
-      }
-    end
-  end
-  return { agent_bin() }
-end
-
 local function parse_models(output)
   local models = {}
   for _, line in ipairs(vim.split(output or '', '\n', { trimempty = true })) do
@@ -74,34 +28,27 @@ local function parse_models(output)
   return models
 end
 
-local CursorCliAcpProvider = setmetatable({}, { __index = BaseProvider })
+--- Cursor CLI provider for 99.nvim.
+--- Spawns the same Cursor Agent binary as agentic.nvim `cursor-acp`, but uses
+--- `--print` subprocess mode (99's provider architecture), not stdio ACP.
+local CursorCliProvider = setmetatable({}, { __index = BaseProvider })
 
-function CursorCliAcpProvider._build_command(_, query, context)
-  local cmd = agent_invocation_prefix()
-  vim.list_extend(cmd, {
-    '--print',
-    '--trust',
-    '--model',
-    context.model,
-    query,
-  })
-  return cmd
+function CursorCliProvider._build_command(_, query, context)
+  return cursor_agent.print_command(query, context.model)
 end
 
-function CursorCliAcpProvider._get_provider_name()
-  return 'CursorCliAcpProvider'
+function CursorCliProvider._get_provider_name()
+  return 'CursorCliProvider'
 end
 
-function CursorCliAcpProvider._get_default_model()
-  return 'composer-2-fast'
+function CursorCliProvider._get_default_model()
+  return cursor_agent.MODEL_COMPOSER_25
 end
 
---- `agent --print` answers on stdout; 99 still reads `<TEMP_FILE>` after exit.
---- If the model never wrote the file (common with --print), use captured stdout.
 --- @param query string
 --- @param context _99.Prompt
 --- @param observer _99.Providers.Observer
-function CursorCliAcpProvider:make_request(query, context, observer)
+function CursorCliProvider:make_request(query, context, observer)
   observer.on_start()
 
   local logger = context.logger:set_area(self:_get_provider_name())
@@ -113,7 +60,7 @@ function CursorCliAcpProvider:make_request(query, context, observer)
     observer.on_complete(status, text)
   end)
 
-  local command = self:_build_command(query, context)
+  local command, env = cursor_agent.print_command(query, context.model)
   local extra_args = context._99 and context._99.provider_extra_args or {}
   if #extra_args > 0 then
     vim.list_extend(command, extra_args)
@@ -124,6 +71,7 @@ function CursorCliAcpProvider:make_request(query, context, observer)
     command,
     {
       text = true,
+      env = env,
       stdout = vim.schedule_wrap(function(err, data)
         logger:debug('stdout', 'data', data)
         if context:is_cancelled() then
@@ -198,20 +146,19 @@ function CursorCliAcpProvider:make_request(query, context, observer)
   context:_set_process(proc)
 end
 
-function CursorCliAcpProvider.fetch_models(callback)
-  local cmd = agent_invocation_prefix()
-  table.insert(cmd, 'models')
-  vim.system(cmd, { text = true }, function(obj)
+function CursorCliProvider.fetch_models(callback)
+  local command, env = cursor_agent.models_command()
+  vim.system(command, { text = true, env = env }, function(obj)
     vim.schedule(function()
       if obj.code ~= 0 then
         local err = vim.trim(obj.stderr ~= '' and obj.stderr or obj.stdout or '')
-        callback(nil, err ~= '' and err or 'Failed to fetch models from agent')
+        callback(nil, err ~= '' and err or 'Failed to fetch models from cursor-agent')
         return
       end
 
       local models = parse_models(obj.stdout)
       if #models == 0 then
-        callback(nil, 'No models returned from agent models')
+        callback(nil, 'No models returned from cursor-agent models')
         return
       end
 
@@ -220,6 +167,6 @@ function CursorCliAcpProvider.fetch_models(callback)
   end)
 end
 
-_99.Providers.CursorCliAcpProvider = CursorCliAcpProvider
+_99.Providers.CursorCliProvider = CursorCliProvider
 
-return CursorCliAcpProvider
+return CursorCliProvider

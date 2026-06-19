@@ -1,110 +1,59 @@
 local M = {}
 
-local function try_snacks(fn_name)
-  local ok, spicker = pcall(require, 'snacks.picker')
-  if not ok or not spicker then
-    return nil
+local function pick_window()
+  if vim.fn.has 'nvim-0.12' == 1 then
+    return {
+      relative = 'msgarea',
+      border = { '▔', '▔', '▔', ' ', ' ', ' ', ' ', ' ' },
+      height = 15,
+    }
   end
-  -- map common telescope names to snacks picker names
-  local map = {
-    find_files = 'files',
-    live_grep = 'grep',
-    help_tags = 'help',
-    keymaps = 'keymaps',
-    current_buffer_fuzzy_find = 'lines',
-    marks = 'marks',
-    man_pages = 'man',
-    git_commits = 'git_log',
-    buffers = 'buffers',
-    quickfix = 'qflist',
-    loclist = 'loclist',
-    jumplist = 'jumps',
-    colorscheme = 'colorschemes',
+  return {
+    relative = 'editor',
+    anchor = 'South',
+    height = 15,
+    border = 'rounded',
   }
-  local snack_name = map[fn_name] or fn_name
-  -- try direct function first (snacks.picker.files)
-  if type(spicker[snack_name]) == 'function' then
-    return spicker[snack_name]
+end
+
+function M.setup()
+  require('mini.pick').setup {
+    window = { config = pick_window() },
+  }
+end
+
+local function builtin(name, opts)
+  local pick = require 'mini.pick'
+  local fn = pick.builtin[name]
+  if type(fn) ~= 'function' then
+    vim.notify('mini.pick builtin not found: ' .. name, vim.log.levels.WARN)
+    return
   end
-  -- otherwise try calling pick with the source name
-  if type(spicker.pick) == 'function' then
-    return function(...)
-      return spicker.pick(snack_name, ...)
-    end
-  end
-  return nil
+  return fn(opts)
 end
 
-local function try_telescope(fn_name)
-  local ok, builtin = pcall(require, 'telescope.builtin')
-  if not ok or not builtin then
-    return nil
-  end
-  return builtin[fn_name]
+function M.files(opts)
+  return builtin('files', opts)
 end
 
-local function call_picker(fn_name, ...)
-  local f = try_snacks(fn_name)
-  if f then
-    return f(...)
-  end
-  local t = try_telescope(fn_name)
-  if t then
-    return t(...)
-  end
-  vim.notify('No picker available: ' .. fn_name, vim.log.levels.WARN)
+function M.grep(opts)
+  return builtin('grep', opts)
 end
 
-function M.find_files(...)
-  return call_picker('find_files', ...)
+function M.grep_live(opts)
+  return builtin('grep_live', opts)
 end
 
-function M.live_grep(...)
-  return call_picker('live_grep', ...)
+function M.buffers(opts)
+  return builtin('buffers', opts)
 end
 
-function M.help_tags(...)
-  return call_picker('help_tags', ...)
+function M.help(opts)
+  return builtin('help', opts)
 end
 
-function M.keymaps(...)
-  return call_picker('keymaps', ...)
-end
-
-function M.current_buffer_fuzzy_find(...)
-  return call_picker('current_buffer_fuzzy_find', ...)
-end
-
-function M.marks(...)
-  return call_picker('marks', ...)
-end
-
-function M.man_pages(...)
-  return call_picker('man_pages', ...)
-end
-
-function M.git_commits(...)
-  return call_picker('git_commits', ...)
-end
-
-function M.buffers(...)
-  return call_picker('buffers', ...)
-end
-
-function M.quickfix(...)
-  return call_picker('quickfix', ...)
-end
-
-function M.loclist(...)
-  return call_picker('loclist', ...)
-end
-
-function M.jumplist(...)
-  return call_picker('jumplist', ...)
-end
-
-function M.colorscheme(...)
-  return call_picker('colorscheme', ...)
+function M.resume(opts)
+  return builtin('resume', opts)
 end
 
 return M

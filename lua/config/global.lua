@@ -1,20 +1,27 @@
--- diagnostics
 vim.diagnostic.config {
-  virtual_text = true,
-  underline = true,
-  signs = true,
+  severity_sort = true,
+  virtual_text = {
+    source = 'if_many',
+    spacing = 2,
+  },
+  underline = { severity = vim.diagnostic.severity.ERROR },
+  signs = vim.g.have_nerd_font and {
+    text = {
+      [vim.diagnostic.severity.ERROR] = '󰅚 ',
+      [vim.diagnostic.severity.WARN] = '󰀪 ',
+      [vim.diagnostic.severity.INFO] = '󰋽 ',
+      [vim.diagnostic.severity.HINT] = '󰌶 ',
+    },
+  } or true,
+  float = { border = 'rounded', source = 'if_many' },
 }
 
--- add new filetypes
 vim.filetype.add {
   extension = {
+    mdc = 'markdown',
     ojs = 'javascript',
-    c3 = 'c3',
-    c3i = 'c3',
-    c3t = 'c3',
+    http = 'http',
   },
 }
 
--- additional builtin vim packages
--- filter quickfix list with Cfilter
 vim.cmd.packadd 'cfilter'

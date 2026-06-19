@@ -1,5 +1,5 @@
---- Windows spawn fixes for agentic.nvim ACP stdio transport.
---- agentic spawns providers with detached=true; on Windows that can allocate
+--- Windows spawn fixes for Cursor Agent ACP stdio transport (avante.nvim, agentic.nvim).
+--- Some clients spawn providers with detached=true; on Windows that can allocate
 --- visible console windows (Windows Terminal tabs) for each child process.
 local M = {}
 
@@ -10,7 +10,7 @@ local function is_acp_spawn(cmd, opts)
 
   local args = opts.args or {}
   for _, arg in ipairs(args) do
-    if arg == 'acp' then
+    if arg == 'acp' or arg == '--print' then
       return true
     end
   end
@@ -28,7 +28,7 @@ local function is_acp_spawn(cmd, opts)
 end
 
 function M.apply()
-  local uv = vim.uv or vim.loop
+  local uv = vim.uv
   if uv._agentic_acp_spawn_patched or vim.fn.has 'win32' ~= 1 then
     return
   end

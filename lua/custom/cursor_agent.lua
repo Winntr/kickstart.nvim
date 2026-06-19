@@ -46,7 +46,7 @@ end
 function M.windows_node_entrypoint()
   local base_path = vim.fn.expand '~/AppData/Local/cursor-agent/versions/'
   local versions = {}
-  local uv = vim.uv or vim.loop
+  local uv = vim.uv
   local req = uv.fs_scandir(base_path)
 
   if req then
@@ -75,11 +75,65 @@ function M.windows_node_entrypoint()
   return base_path .. latest .. '/node.exe', base_path .. latest .. '/index.js'
 end
 
---- Provider config for agentic.nvim `cursor-acp`.
+--- @return { command: string, args: string[], env?: table<string, string> }
+function M.cursor_cli_entrypoint()
+  if is_windows() then
+    local node, index_js = M.windows_node_entrypoint()
+    if node and index_js then
+      return {
+        command = node,
+        args = { index_js },
+        env = {
+          CURSOR_INVOKED_AS = 'agent',
+          NODE_COMPILE_CACHE = vim.fn.expand '~/AppData/Local/cursor-compile-cache',
+        },
+      }
+    end
+  end
+
+  return {
+    command = 'cursor-agent',
+    args = {},
+  }
+end
+
+--- Build argv for `cursor-agent --print` (99.nvim subprocess provider).
+--- Uses the same Windows node.exe entrypoint as ACP; protocol is `--print`, not `acp`.
+--- @param query string
+--- @param model_id? string
+--- @return string[] argv
+--- @return table<string, string>|nil env
+function M.print_command(query, model_id)
+  model_id = model_id or M.MODEL_COMPOSER_25
+  local entry = M.cursor_cli_entrypoint()
+  local argv = { entry.command }
+  vim.list_extend(argv, entry.args)
+  vim.list_extend(argv, {
+    '--trust',
+    '--force',
+    '--model',
+    model_id,
+    '--print',
+    query,
+  })
+  return argv, entry.env
+end
+
+--- @return string[] argv
+--- @return table<string, string>|nil env
+function M.models_command()
+  local entry = M.cursor_cli_entrypoint()
+  local argv = { entry.command }
+  vim.list_extend(argv, entry.args)
+  table.insert(argv, 'models')
+  return argv, entry.env
+end
+
+--- Provider config for ACP clients (avante.nvim, agentic.nvim).
 --- On Windows, spawn node.exe directly with the `acp` subcommand. PowerShell and
 --- .cmd wrappers exit early under libuv stdio spawn and break ACP initialization.
 --- @return { command: string, args: string[], env?: table<string, string> }
-function M.agentic_acp_provider()
+function M.acp_provider()
   if is_windows() then
     local node, index_js = M.windows_node_entrypoint()
     if node and index_js then
@@ -98,6 +152,11 @@ function M.agentic_acp_provider()
     command = 'cursor-agent',
     args = { 'acp' },
   }
+end
+
+--- @deprecated Use acp_provider()
+function M.agentic_acp_provider()
+  return M.acp_provider()
 end
 
 --- argv prefix for spawning `agent` (PowerShell + ps1 on Windows when available).

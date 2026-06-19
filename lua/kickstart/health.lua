@@ -12,10 +12,10 @@ local check_version = function()
     return
   end
 
-  if vim.version.cmp(vim.version(), { 0, 9, 4 }) >= 0 then
+  if vim.version.cmp(vim.version(), { 0, 12, 0 }) >= 0 then
     vim.health.ok(string.format("Neovim version is: '%s'", tostring(vim.version())))
   else
-    vim.health.error(string.format("Neovim out of date: '%s'. Upgrade to latest stable or nightly", tostring(vim.version())))
+    vim.health.error(string.format("Neovim out of date: '%s'. Upgrade to 0.12+", tostring(vim.version())))
   end
 end
 
@@ -134,7 +134,7 @@ return {
     Mason will give warnings for languages that are not installed.
     You do not need to install, unless you want to use those languages!]]
 
-    local uv = vim.uv or vim.loop
+    local uv = vim.uv
     vim.health.info('System Information: ' .. vim.inspect(uv.os_uname()))
 
     check_version()

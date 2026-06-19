@@ -1,6 +1,7 @@
 return {
   {
     'gelguy/wilder.nvim',
+    enabled = false,
     event = 'CmdlineEnter',
     dependencies = {
       { 'romgrk/fzy-lua-native', build = 'make', cond = vim.fn.has('win32') == 0 },

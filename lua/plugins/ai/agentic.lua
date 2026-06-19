@@ -3,6 +3,7 @@ local cursor_provider = require('custom.cursor_agent').agentic_acp_provider()
 return {
   {
     'carlos-algms/agentic.nvim',
+    enabled = false,
     init = function()
       require('custom.patches.agentic_acp_transport').apply()
     end,
