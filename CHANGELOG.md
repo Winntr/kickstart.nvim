@@ -6,6 +6,8 @@
 - Restored `which-key.nvim` with auto-discovery from `desc` keymaps plus `<leader>?` / `<leader><leader>` cheat sheets.
 - Enabled `99.nvim` with a custom `CursorCliProvider` using the shared Cursor Agent CLI (`cursor_agent.print_command`) on Windows via `node.exe index.js --print`.
 - Replaced `agentic.nvim` with `avante.nvim` using `cursor-acp` and shared `cursor_agent.acp_provider()` Windows spawn helpers.
+- Added `blink.cmp` (pinned to `1.*`) with `blink.compat` for Avante completion sources.
+- Added `custom.patches.wtf_cursor` to run `wtf.nvim` prompts through Cursor CLI `--print` on Windows-safe spawn paths.
 
 ### Changed
 - Refactored startup into thin `init.lua` plus `lua/config/{options,global,autocommands,keymap}.lua`.
@@ -15,6 +17,9 @@
 - Disabled overlapping AI plugins by default (`codecompanion`, `wtf`, `agentic`); kept Copilot, Avante (Cursor ACP), and 99 (Cursor CLI `--print`).
 - Pruned unused colorscheme specs; Kanagawa remains the active theme.
 - Updated `agentic.nvim` Windows `cursor-acp` startup to use `custom.cursor_agent.agentic_acp_provider()`, spawning Cursor Agent `node.exe` directly with the `acp` subcommand instead of PowerShell or `.cmd` wrappers.
+- Migrated completion from `nvim-cmp` to `blink.cmp` and kept `copilot.lua` as the inline ghost-text provider.
+- Enabled `wtf.nvim` with `picker = 'snacks'` and a Cursor-backed provider.
+- Re-enabled `wilder.nvim` command-line/search UI with `vim_fuzzy_filter` fallback on Windows.
 
 ### Fixed
 - Corrected `vim.opt.expandtab` (was incorrectly assigned to `vim.expandtab`).
@@ -36,4 +41,6 @@
 - `mason-lspconfig.nvim` (redundant with Neovim 0.12 native `vim.lsp.config()` / `vim.lsp.enable()`).
 - Default `agentic.nvim` chat UI (replaced by `avante.nvim`).
 - Default `nvim-telescope/telescope.nvim` stack and `misc.pickers` Telescope/Snacks fallback layer.
-- Default `wilder.nvim` cmdline UI.
+- `nvim-cmp` and companion sources (`cmp-*`, `copilot-cmp`, `lspkind-nvim`, `otter.nvim`) in favor of `blink.cmp`.
+- Default `agentic.nvim`, `codecompanion.nvim`, and `profile.nvim` specs from plugin import paths.
+- `nvim-autopairs` after moving to blink-based completion flow.

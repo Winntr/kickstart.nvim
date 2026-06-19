@@ -60,3 +60,48 @@ On Windows, 99 spawns `node.exe <cursor-agent>/index.js --trust --force --model 
 | `<leader>9m` | Select model |
 
 Default model: `composer-2.5` (`cursor_agent.MODEL_COMPOSER_25`).
+
+## wtf.nvim with Cursor CLI
+
+`wtf.nvim` now uses provider `cursor` from `lua/custom/patches/wtf_cursor.lua`.
+This provider shells out to `cursor-agent --print` through
+`cursor_agent.print_command()` and uses the same Windows-safe `node.exe index.js`
+spawn path as `99.nvim`.
+
+### Why this is `--print` and not ACP
+
+`wtf.nvim`'s upstream client is request/response and provider-based. ACP is a
+long-lived stdio protocol intended for agent sessions (used by Avante). For
+single diagnostic explain/fix prompts, `--print` is the correct transport.
+
+### If `wtf` returns empty output or fails
+
+1. Confirm `agent status` works in a terminal.
+2. Confirm `cursor-agent models` returns at least one model.
+3. Verify `lua/plugins/ai/wtf.lua` sets `provider = 'cursor'`.
+4. Check Neovim messages for stderr from the Cursor CLI subprocess.
+
+## blink.cmp and copilot.lua coexistence
+
+This config uses:
+
+- `blink.cmp` for popup completion (`Tab`, `S-Tab`, `CR`)
+- `copilot.lua` for inline ghost text (`<C-y>` accept)
+
+`vim.g.ai_cmp = false` in `lua/config/options.lua` prevents Copilot from trying
+to own completion menu behavior.
+
+`lua/plugins/blink.lua` also toggles `vim.b.copilot_suggestion_hidden` on
+`BlinkCmpMenuOpen` and `BlinkCmpMenuClose` so ghost text and menu do not fight.
+
+If `<C-y>` confirms a menu item instead of accepting Copilot text, check blink
+keymaps and make sure `<C-y>` is not mapped to `select_and_accept`.
+
+## Wilder on Windows
+
+`wilder.nvim` is enabled and falls back to `wilder.vim_fuzzy_filter()` on
+Windows (where `fzy-lua-native` is not built). If the popup fails to render:
+
+1. Run `:checkhealth` and confirm no UI ext errors.
+2. Test `:` and `/` modes directly after startup.
+3. Temporarily disable msgarea routing to isolate cmdline UI conflicts.

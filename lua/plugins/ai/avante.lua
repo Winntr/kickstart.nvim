@@ -195,7 +195,8 @@ return {
       'nvim-lua/plenary.nvim',
       'MunifTanjim/nui.nvim',
       'nvim-mini/mini.pick',
-      'hrsh7th/nvim-cmp',
+      'saghen/blink.cmp',
+      'saghen/blink.compat',
       'folke/snacks.nvim',
       'MeanderingProgrammer/render-markdown.nvim',
       {

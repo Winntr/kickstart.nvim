@@ -9,7 +9,6 @@ return {
       { 'williamboman/mason.nvim', opts = {} },
       'WhoIsSethDaniel/mason-tool-installer.nvim',
       { 'j-hui/fidget.nvim', opts = {} },
-      'hrsh7th/cmp-nvim-lsp',
     },
     config = function()
       vim.api.nvim_create_autocmd('LspAttach', {
@@ -36,7 +35,10 @@ return {
       })
 
       local capabilities = vim.lsp.protocol.make_client_capabilities()
-      capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
+      local ok_blink, blink = pcall(require, 'blink.cmp')
+      if ok_blink then
+        capabilities = blink.get_lsp_capabilities(capabilities)
+      end
 
       vim.lsp.config('*', { capabilities = capabilities })
 
