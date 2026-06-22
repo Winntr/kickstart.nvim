@@ -63,10 +63,12 @@ Default model: `composer-2.5` (`cursor_agent.MODEL_COMPOSER_25`).
 
 ## wtf.nvim with Cursor CLI
 
-`wtf.nvim` now uses provider `cursor` from `lua/custom/patches/wtf_cursor.lua`.
-This provider shells out to `cursor-agent --print` through
-`cursor_agent.print_command()` and uses the same Windows-safe `node.exe index.js`
-spawn path as `99.nvim`.
+`wtf.nvim` diagnose/fix commands use `lua/custom/wtf_cursor.lua`, which shells out
+to `cursor-agent --print` through `cursor_agent.print_command()` and uses the same
+Windows-safe `node.exe index.js` spawn path as `99.nvim`.
+
+The wtf plugin itself is configured with a built-in provider (`ollama`) only for
+history/search UI validation. AI diagnose/fix do not use wtf's HTTP client.
 
 ### Why this is `--print` and not ACP
 
@@ -78,7 +80,7 @@ single diagnostic explain/fix prompts, `--print` is the correct transport.
 
 1. Confirm `agent status` works in a terminal.
 2. Confirm `cursor-agent models` returns at least one model.
-3. Verify `lua/plugins/ai/wtf.lua` sets `provider = 'cursor'`.
+3. Verify `<leader>awd` / `<leader>awf` call `custom.wtf_cursor` (not `wtf.diagnose` directly).
 4. Check Neovim messages for stderr from the Cursor CLI subprocess.
 
 ## blink.cmp and copilot.lua coexistence

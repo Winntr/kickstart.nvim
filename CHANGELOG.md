@@ -7,7 +7,7 @@
 - Enabled `99.nvim` with a custom `CursorCliProvider` using the shared Cursor Agent CLI (`cursor_agent.print_command`) on Windows via `node.exe index.js --print`.
 - Replaced `agentic.nvim` with `avante.nvim` using `cursor-acp` and shared `cursor_agent.acp_provider()` Windows spawn helpers.
 - Added `blink.cmp` (pinned to `1.*`) with `blink.compat` for Avante completion sources.
-- Added `custom.patches.wtf_cursor` to run `wtf.nvim` prompts through Cursor CLI `--print` on Windows-safe spawn paths.
+- Added `custom.wtf_cursor` adapter to run wtf diagnose/fix through Cursor CLI `--print` on Windows-safe spawn paths.
 
 ### Changed
 - Refactored startup into thin `init.lua` plus `lua/config/{options,global,autocommands,keymap}.lua`.

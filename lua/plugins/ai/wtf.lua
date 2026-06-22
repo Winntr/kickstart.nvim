@@ -1,28 +1,19 @@
 return {
   {
     'piersolenski/wtf.nvim',
-    init = function()
-      require('custom.patches.wtf_cursor').apply()
-    end,
     dependencies = {
       'nvim-lua/plenary.nvim',
       'MunifTanjim/nui.nvim',
       'folke/snacks.nvim',
     },
-    config = function(_, opts)
-      local setup_opts = vim.deepcopy(opts)
-      -- Upstream validates provider name against built-ins during setup.
-      -- Bootstrap with a built-in provider, then switch to our patched cursor provider.
-      setup_opts.provider = 'copilot'
-      require('wtf').setup(setup_opts)
-      require('wtf.config').options.provider = 'cursor'
-    end,
     opts = {
-      provider = 'cursor',
+      -- Built-in provider is only used for history/search UI paths.
+      -- Diagnose/fix AI calls go through `custom.wtf_cursor` (Cursor CLI --print).
+      provider = 'ollama',
       picker = 'snacks',
       providers = {
-        cursor = {
-          model_id = require('custom.cursor_agent').MODEL_COMPOSER_25,
+        ollama = {
+          model_id = vim.env.OLLAMA_MODEL_ID or 'unused',
         },
       },
     },
@@ -31,7 +22,7 @@ return {
         '<leader>awd',
         mode = { 'n', 'x' },
         function()
-          require('wtf').diagnose()
+          require('custom.wtf_cursor').diagnose()
         end,
         desc = 'Debug diagnostic with AI',
       },
@@ -39,7 +30,7 @@ return {
         '<leader>awf',
         mode = { 'n', 'x' },
         function()
-          require('wtf').fix()
+          require('custom.wtf_cursor').fix()
         end,
         desc = 'Fix diagnostic with AI',
       },
