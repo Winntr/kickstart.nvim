@@ -10,9 +10,19 @@ return {
       vim.g.msgarea_min_height = 3
     end,
     config = function()
+      local msgarea_util = require 'custom.msgarea'
+
       vim.keymap.set('n', '<M-n>', function()
-        require('msgarea').close_all()
+        msgarea_util.close()
       end, { desc = 'Close msgarea' })
+
+      vim.keymap.set('n', '<leader>mc', function()
+        msgarea_util.close()
+      end, { desc = 'Close msgarea' })
+
+      vim.api.nvim_create_user_command('MsgareaClose', function()
+        msgarea_util.close()
+      end, { desc = 'Close all msgarea windows and collapse cmdheight' })
     end,
   },
 }

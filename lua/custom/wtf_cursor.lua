@@ -1,6 +1,7 @@
 --- Cursor CLI backend for wtf.nvim diagnose/fix commands.
 --- Uses `cursor-agent --print` (one-shot), not ACP. Reuses wtf.nvim UI utilities.
 local cursor_agent = require 'custom.cursor_agent'
+local msgarea = require 'custom.msgarea'
 
 local M = {}
 
@@ -32,7 +33,7 @@ function M.query(system, message)
 end
 
 local function notify_started(action)
-  vim.notify(string.format('%s with Cursor CLI: %s', action, MODEL), vim.log.levels.INFO)
+  msgarea.echo_status(string.format('%s with Cursor CLI: %s', action, MODEL))
 end
 
 --- @param response string
@@ -78,6 +79,7 @@ function M.diagnose(opts)
   local process_diagnostics = require 'wtf.util.process_diagnostics'
   local save_chat = require 'wtf.util.save_chat'
 
+  msgarea.reset()
   hooks.run_started_hook()
 
   local language = config.options.language
@@ -91,7 +93,7 @@ function M.diagnose(opts)
 
   local result = process_diagnostics(opts)
   if result.err then
-    vim.notify(result.err, vim.log.levels.WARN)
+    msgarea.echo_warn(result.err)
     hooks.run_finished_hook()
     return result.err
   end
@@ -101,7 +103,7 @@ function M.diagnose(opts)
   local co = coroutine.create(function()
     local response, err = M.query(system_prompt, result.payload)
     if err then
-      vim.notify(err, vim.log.levels.ERROR)
+      msgarea.echo_error(err)
       hooks.run_finished_hook()
       return
     end
@@ -109,7 +111,7 @@ function M.diagnose(opts)
     save_chat(response)
     local _, popup_err = popup.show(response)
     if popup_err then
-      vim.notify(popup_err, vim.log.levels.ERROR)
+      msgarea.echo_error(popup_err)
     end
     hooks.run_finished_hook()
   end)
@@ -122,6 +124,7 @@ function M.fix(opts)
   local hooks = require 'wtf.hooks'
   local process_diagnostics = require 'wtf.util.process_diagnostics'
 
+  msgarea.reset()
   hooks.run_started_hook()
 
   local system_prompt = 'You are a code correction tool integrated into Neovim. '
@@ -147,7 +150,7 @@ function M.fix(opts)
 
   local result = process_diagnostics(opts)
   if result.err then
-    vim.notify(result.err, vim.log.levels.WARN)
+    msgarea.echo_warn(result.err)
     hooks.run_finished_hook()
     return result.err
   end
@@ -157,33 +160,33 @@ function M.fix(opts)
   local co = coroutine.create(function()
     local response, err = M.query(system_prompt, result.payload)
     if err then
-      vim.notify(err, vim.log.levels.ERROR)
+      msgarea.echo_error(err)
       hooks.run_finished_hook()
       return
     end
 
     local parsed = parse_fix_response(response)
     if not parsed then
-      vim.notify('Failed to parse AI response. Expected JSON format.', vim.log.levels.ERROR)
+      msgarea.echo_error('Failed to parse AI response. Expected JSON format.')
       hooks.run_finished_hook()
       return
     end
 
     if parsed.error then
-      vim.notify('AI Error: ' .. parsed.error, vim.log.levels.ERROR)
+      msgarea.echo_error('AI Error: ' .. parsed.error)
       hooks.run_finished_hook()
       return
     end
 
     if not parsed.code then
-      vim.notify('No code in AI response', vim.log.levels.ERROR)
+      msgarea.echo_error('No code in AI response')
       hooks.run_finished_hook()
       return
     end
 
     local fixed_lines = vim.split(parsed.code, '\n')
     vim.api.nvim_buf_set_lines(0, result.line1 - 1, result.line2, false, fixed_lines)
-    vim.notify('Code fixed successfully!', vim.log.levels.INFO)
+    msgarea.echo_status('Code fixed successfully!')
     hooks.run_finished_hook()
   end)
 

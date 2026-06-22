@@ -107,3 +107,21 @@ Windows (where `fzy-lua-native` is not built). If the popup fails to render:
 1. Run `:checkhealth` and confirm no UI ext errors.
 2. Test `:` and `/` modes directly after startup.
 3. Temporarily disable msgarea routing to isolate cmdline UI conflicts.
+
+## Msgarea dismiss and reset
+
+Sticky msgarea content can be dismissed with:
+
+| Key / command | Action |
+|---------------|--------|
+| `<Esc>` (normal mode) | Close msgarea if open, otherwise clear search highlights |
+| `<M-n>` (`Alt+n`) | Close all msgarea windows |
+| `<leader>mc` | Close all msgarea windows |
+| `:MsgareaClose` | Close all msgarea windows |
+
+`lua/custom/msgarea.lua` centralizes close/reset helpers. Local flows that reclaim the msgarea region call `reset()` before opening:
+
+- `mini.pick` pickers (`<leader>ff`, `<leader>fg`, etc.)
+- `wtf.nvim` diagnose/fix via `custom.wtf_cursor` (`<leader>awd`, `<leader>awf`)
+
+Lightweight `wtf` status output (start, success, warnings, errors) is routed through msgarea via ui2 message targets. Multi-line diagnose responses still open in the `wtf` popup.

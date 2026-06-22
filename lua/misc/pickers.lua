@@ -23,10 +23,14 @@ function M.setup()
 end
 
 local function builtin(name, opts)
+  if vim.fn.has 'nvim-0.12' == 1 then
+    require('custom.msgarea').reset()
+  end
+
   local pick = require 'mini.pick'
   local fn = pick.builtin[name]
   if type(fn) ~= 'function' then
-    vim.notify('mini.pick builtin not found: ' .. name, vim.log.levels.WARN)
+    require('custom.msgarea').echo_warn('mini.pick builtin not found: ' .. name)
     return
   end
   return fn(opts)

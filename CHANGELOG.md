@@ -2,6 +2,7 @@
 
 ### Added
 - [`msgarea.nvim`](https://github.com/edisj/msgarea.nvim) integration with Neovim ui2 message routing for sticky errors, shell output, and cmdline-style flows (requires Neovim 0.12+).
+- `custom.msgarea` helper for closing, resetting, and routing lightweight status output through msgarea.
 - `mini.pick` as the primary picker surface, routed into msgarea when available.
 - Restored `which-key.nvim` with auto-discovery from `desc` keymaps plus `<leader>?` / `<leader><leader>` cheat sheets.
 - Enabled `99.nvim` with a custom `CursorCliProvider` using the shared Cursor Agent CLI (`cursor_agent.print_command`) on Windows via `node.exe index.js --print`.
@@ -10,7 +11,9 @@
 - Added `custom.wtf_cursor` adapter to run wtf diagnose/fix through Cursor CLI `--print` on Windows-safe spawn paths.
 
 ### Changed
-- Refactored startup into thin `init.lua` plus `lua/config/{options,global,autocommands,keymap}.lua`.
+- Normal-mode `<Esc>` now closes sticky msgarea content first, then falls back to `:nohlsearch`.
+- `wtf.nvim` diagnose/fix status messages now route through msgarea instead of Snacks notifier toasts.
+- `mini.pick` clears stale msgarea content before opening in the msgarea region.
 - Migrated LSP setup to native `vim.lsp.config()` / `vim.lsp.enable()` for Neovim 0.12.
 - Replaced Telescope-first navigation with `mini.pick`; Snacks now covers terminal, lazygit, notifier, and statuscolumn only.
 - Aggressively reduced default keymaps; trimmed `which-key.nvim` to group labels only (no manual keymap tree).
