@@ -1,6 +1,7 @@
 ## [Unreleased]
 
 ### Added
+- Lazygit `G` custom command for AI-generated commit messages via `scripts/lazygit-ai-commit.ps1` (Cursor `agent -p`; config generated at runtime with absolute paths for Windows lazygit).
 - Diffview keymaps under `<leader>g`: `gd` open changes, `gD` toggle, `gH` file history, `gP` vs last commit.
 - `custom.msgarea` helper for closing, resetting, and routing lightweight status output through msgarea.
 - `mini.pick` as the primary picker surface, routed into msgarea when available.

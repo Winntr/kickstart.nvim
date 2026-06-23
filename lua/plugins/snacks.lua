@@ -1,3 +1,32 @@
+local function lazygit_ai_config_path()
+  local path = vim.fn.stdpath 'cache' .. '/lazygit-ai-commit.yml'
+  local ps1 = vim.fs.normalize(vim.fn.stdpath 'config' .. '/scripts/lazygit-ai-commit.ps1'):gsub('\\', '/')
+  vim.fn.writefile({
+    'customCommands:',
+    '  - key: "G"',
+    '    description: "AI commit message (Cursor agent)"',
+    '    context: "files"',
+    '    loadingText: "Generating commit message..."',
+    '    command: \'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "' .. ps1 .. '"\'',
+    '    subprocess: true',
+  }, path)
+  return path
+end
+
+local function with_lazygit_config(fn)
+  return function(...)
+    local ai_config = lazygit_ai_config_path()
+    local files = vim.tbl_filter(function(v)
+      return v ~= ''
+    end, vim.split(vim.env.LG_CONFIG_FILE or '', ',', { plain = true }))
+    if not vim.tbl_contains(files, ai_config) then
+      table.insert(files, 1, ai_config)
+      vim.env.LG_CONFIG_FILE = table.concat(files, ',')
+    end
+    return fn(...)
+  end
+end
+
 return {
   {
     'folke/snacks.nvim',
@@ -41,23 +70,23 @@ return {
       },
       {
         '<leader>gg',
-        function()
+        with_lazygit_config(function()
           Snacks.lazygit()
-        end,
+        end),
         desc = 'Lazygit',
       },
       {
         '<leader>gf',
-        function()
+        with_lazygit_config(function()
           Snacks.lazygit.log_file()
-        end,
+        end),
         desc = 'Lazygit file history',
       },
       {
         '<leader>gl',
-        function()
+        with_lazygit_config(function()
           Snacks.lazygit.log()
-        end,
+        end),
         desc = 'Lazygit log',
       },
     },
