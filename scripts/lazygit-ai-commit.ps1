@@ -1,4 +1,10 @@
 # ponytail: Windows-native lazygit AI commit via Cursor agent; no WSL/bash required
+param(
+  [Parameter(Mandatory)]
+  [ValidateSet('staged', 'all')]
+  [string]$Scope
+)
+
 $ErrorActionPreference = 'Stop'
 
 function Invoke-Git {
@@ -18,13 +24,18 @@ if (-not (Test-Path -LiteralPath $agent)) {
   exit 1
 }
 
-$diff = Invoke-Git diff --cached --diff-algorithm=minimal
-if (-not $diff) {
-  $diff = Invoke-Git diff --diff-algorithm=minimal
-}
-if (-not $diff) {
-  Write-Error 'No changes to commit'
-  exit 1
+if ($Scope -eq 'staged') {
+  $diff = Invoke-Git diff --cached --diff-algorithm=minimal
+  if (-not $diff) {
+    Write-Error 'Nothing staged'
+    exit 1
+  }
+} else {
+  $diff = Invoke-Git diff HEAD --diff-algorithm=minimal
+  if (-not $diff) {
+    Write-Error 'No uncommitted changes'
+    exit 1
+  }
 }
 
 $prompt = @'

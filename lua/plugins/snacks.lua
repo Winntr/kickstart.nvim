@@ -7,8 +7,21 @@ local function lazygit_ai_config_path()
     '    description: "AI commit message (Cursor agent)"',
     '    context: "files"',
     '    loadingText: "Generating commit message..."',
-    '    command: \'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "' .. ps1 .. '"\'',
-    '    subprocess: true',
+    '    prompts:',
+    '      - type: "menu"',
+    '        title: "Which changes?"',
+    '        key: "Scope"',
+    '        options:',
+    '          - value: "staged"',
+    '            name: "Staged only"',
+    '            description: "git diff --cached"',
+    '            key: "s"',
+    '          - value: "all"',
+    '            name: "All uncommitted"',
+    '            description: "git diff HEAD"',
+    '            key: "a"',
+    '    command: \'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "' .. ps1 .. '" -Scope {{.Form.Scope | quote}}\'',
+    '    output: terminal',
   }, path)
   return path
 end
