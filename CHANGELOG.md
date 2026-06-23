@@ -12,7 +12,7 @@
 
 ### Changed
 - Migrated `nvim-treesitter` and `nvim-treesitter-textobjects` to the `main` branch rewrite for Neovim 0.12 compatibility (fixes render-markdown/Avante `range` nil treesitter errors).
-- Normal-mode `<Esc>` now closes sticky msgarea content first, then falls back to `:nohlsearch`.
+- Normal-mode `<Esc>` hides msgarea first, then closes hidden windows; `<leader>ms` / `<M-n>` restore collapsed msgarea for scrolling.
 - `wtf.nvim` diagnose/fix status messages now route through msgarea instead of Snacks notifier toasts.
 - `mini.pick` clears stale msgarea content before opening in the msgarea region.
 - Migrated LSP setup to native `vim.lsp.config()` / `vim.lsp.enable()` for Neovim 0.12.

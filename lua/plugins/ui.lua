@@ -38,6 +38,7 @@ return {
         { '<leader>9', group = '99' },
         { '<leader>e', group = 'Explorer' },
         { '<leader>q', group = 'Quickfix' },
+        { '<leader>m', group = 'Msgarea' },
       },
     },
     keys = {

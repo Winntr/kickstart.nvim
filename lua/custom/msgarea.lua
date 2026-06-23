@@ -18,6 +18,65 @@ function M.is_open()
   return #msgarea.state.active_windows > 0
 end
 
+--- @return boolean
+function M.is_visible()
+  if not M.is_open() then
+    return false
+  end
+  local msgarea = require 'msgarea'
+  return vim.o.cmdheight > msgarea.original_cmdheight
+end
+
+--- Hide msgarea windows without destroying them (can be shown again).
+--- @return boolean
+function M.hide()
+  if not M.available() then
+    return false
+  end
+  if not M.is_visible() then
+    return false
+  end
+  require('msgarea').hide()
+  return true
+end
+
+--- Expand msgarea and focus it so j/k/mouse scroll work.
+--- @return boolean
+function M.show()
+  if not M.available() then
+    return false
+  end
+  local msgarea = require 'msgarea'
+  if #msgarea.state.active_windows == 0 then
+    vim.notify('No msgarea windows to show', vim.log.levels.WARN)
+    return false
+  end
+
+  if msgarea.state.focused == nil then
+    local last = msgarea.get_last_focused()
+    msgarea.state.focused = last or msgarea.state.active_windows[1].winid
+  end
+
+  msgarea.show()
+
+  local winid = msgarea.state.focused
+  if winid and vim.api.nvim_win_is_valid(winid) then
+    vim.api.nvim_set_current_win(winid)
+  end
+
+  return true
+end
+
+--- Toggle msgarea visibility without closing buffers.
+--- @return boolean visible
+function M.toggle()
+  if M.is_visible() then
+    M.hide()
+    return false
+  end
+  return M.show()
+end
+
 --- Close all msgarea windows and collapse cmdheight.
 --- @return boolean closed True when at least one window was open.
 function M.close()
@@ -38,8 +97,12 @@ function M.reset()
   require('msgarea').close_all()
 end
 
---- Close sticky msgarea content, otherwise clear search highlights.
+--- Hide visible msgarea first; close hidden windows; else clear search highlights.
 function M.dismiss_or_fallback()
+  if M.is_visible() then
+    M.hide()
+    return
+  end
   if M.close() then
     return
   end

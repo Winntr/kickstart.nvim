@@ -110,14 +110,20 @@ Windows (where `fzy-lua-native` is not built). If the popup fails to render:
 
 ## Msgarea dismiss and reset
 
-Sticky msgarea content can be dismissed with:
+Sticky msgarea content can be dismissed or restored with. All msgarea bindings use the `<leader>m` prefix (`<leader>m` opens the which-key submenu):
 
 | Key / command | Action |
 |---------------|--------|
-| `<Esc>` (normal mode) | Close msgarea if open, otherwise clear search highlights |
-| `<M-n>` (`Alt+n`) | Close all msgarea windows |
+| `<Esc>` (normal mode) | Hide visible msgarea, else close hidden windows, else clear search highlights |
+| `<M-n>` (`Alt+n`) | Toggle msgarea show/hide (non-destructive) |
+| `<leader>ms` | Show/expand msgarea and focus it for scrolling |
+| `<leader>mt` | Toggle msgarea show/hide |
 | `<leader>mc` | Close all msgarea windows |
+| `:MsgareaShow` | Expand and focus msgarea |
+| `:MsgareaToggle` | Toggle msgarea visibility |
 | `:MsgareaClose` | Close all msgarea windows |
+
+Clicking back into the editor collapses msgarea without destroying it. Use `<leader>ms` or `<M-n>` to bring it back and scroll with `j`/`k` while focused.
 
 `lua/custom/msgarea.lua` centralizes close/reset helpers. Local flows that reclaim the msgarea region call `reset()` before opening:
 

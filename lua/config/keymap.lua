@@ -2,7 +2,7 @@ local map = vim.keymap.set
 
 map('n', '<Esc>', function()
   require('custom.msgarea').dismiss_or_fallback()
-end, { desc = 'Close msgarea or clear search highlight' })
+end, { desc = 'Hide/close msgarea or clear search highlight' })
 map('n', '<C-h>', '<C-w>h', { desc = 'Window left' })
 map('n', '<C-j>', '<C-w>j', { desc = 'Window down' })
 map('n', '<C-k>', '<C-w>k', { desc = 'Window up' })
