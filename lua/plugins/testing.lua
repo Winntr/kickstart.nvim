@@ -5,7 +5,7 @@ return {
     dependencies = {
       'nvim-neotest/nvim-nio',       -- async I/O (also used by dap-ui)
       'nvim-lua/plenary.nvim',       -- async utilities
-      'nvim-treesitter/nvim-treesitter', -- syntax parsing for test discovery
+      { 'nvim-treesitter/nvim-treesitter', branch = 'main', optional = true }, -- syntax parsing for test discovery
       'antoinemadec/FixCursorHold.nvim', -- fix CursorHold performance
 
       -- Language adapters

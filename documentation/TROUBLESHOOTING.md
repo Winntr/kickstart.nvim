@@ -125,3 +125,25 @@ Sticky msgarea content can be dismissed with:
 - `wtf.nvim` diagnose/fix via `custom.wtf_cursor` (`<leader>awd`, `<leader>awf`)
 
 Lightweight `wtf` status output (start, success, warnings, errors) is routed through msgarea via ui2 message targets. Multi-line diagnose responses still open in the `wtf` popup.
+
+## Avante / render-markdown treesitter errors
+
+If Avante or markdown rendering errors with:
+
+```
+attempt to call method 'range' (a nil value)
+```
+
+in `vim/treesitter.lua` via `nvim-treesitter/query_predicates.lua` and `render-markdown.nvim`, the usual cause is the archived `nvim-treesitter` **master** branch on Neovim 0.12. This config uses the **main** branch rewrite.
+
+### Fix steps
+
+1. **Close every Neovim instance** (the old plugin `.so` files stay locked while Neovim is open).
+2. In Lazy (`:Lazy`), find `nvim-treesitter`, press `x` to remove the old install, then run `:Lazy update`.
+3. Confirm `tree-sitter-cli` is on PATH (`tree-sitter --version`).
+4. Run `:TSUpdate` to rebuild parsers for the new plugin.
+5. Restart Neovim and reopen the Avante sidebar.
+
+If errors persist after migration, run `:checkhealth render-markdown` and confirm markdown parsers are installed.
+
+This config also patches `render-markdown` to skip a render pass when treesitter parse fails on a streaming buffer (common while Avante is still writing output). That stops the error spam, but you still need the `main` branch install for full markdown rendering.

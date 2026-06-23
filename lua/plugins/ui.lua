@@ -114,6 +114,10 @@ return {
   {
     'MeanderingProgrammer/render-markdown.nvim',
     ft = { 'markdown', 'Avante' },
+    config = function(_, opts)
+      require('render-markdown').setup(opts)
+      require('custom.patches.render_markdown_treesitter').apply()
+    end,
     opts = {
       anti_conceal = { enabled = false },
       heading = { enabled = false },
@@ -128,7 +132,7 @@ return {
     'stevearc/aerial.nvim',
     cmd = { 'AerialToggle', 'AerialOpen', 'AerialNavToggle' },
     dependencies = {
-      'nvim-treesitter/nvim-treesitter',
+      { 'nvim-treesitter/nvim-treesitter', branch = 'main', optional = true },
       'nvim-tree/nvim-web-devicons',
     },
     opts = {

@@ -11,6 +11,7 @@
 - Added `custom.wtf_cursor` adapter to run wtf diagnose/fix through Cursor CLI `--print` on Windows-safe spawn paths.
 
 ### Changed
+- Migrated `nvim-treesitter` and `nvim-treesitter-textobjects` to the `main` branch rewrite for Neovim 0.12 compatibility (fixes render-markdown/Avante `range` nil treesitter errors).
 - Normal-mode `<Esc>` now closes sticky msgarea content first, then falls back to `:nohlsearch`.
 - `wtf.nvim` diagnose/fix status messages now route through msgarea instead of Snacks notifier toasts.
 - `mini.pick` clears stale msgarea content before opening in the msgarea region.
@@ -25,7 +26,8 @@
 - Re-enabled `wilder.nvim` command-line/search UI with `vim_fuzzy_filter` fallback on Windows.
 
 ### Fixed
-- Corrected `vim.opt.expandtab` (was incorrectly assigned to `vim.expandtab`).
+- Hardened `nvim-treesitter` config to avoid startup crash when the plugin directory is missing after a failed Lazy sync.
+- Guarded `render-markdown.nvim` treesitter parse during Avante streaming to avoid `range (a nil value)` crashes when parser nodes are stale.
 - Fixed `msgarea.nvim` startup crash by enabling Neovim ui2 in `config/ui2.lua` before lazy.nvim loads the plugin (ui2 `msg` must exist when `plugin/msgarea.lua` patches `msg_show`).
 - Replaced deprecated `vim.highlight.on_yank()` with `vim.hl.on_yank()`.
 - Replaced legacy `vim.loop` fallbacks with `vim.uv` in custom Windows spawn helpers.
