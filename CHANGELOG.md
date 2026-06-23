@@ -1,7 +1,7 @@
 ## [Unreleased]
 
 ### Added
-- [`msgarea.nvim`](https://github.com/edisj/msgarea.nvim) integration with Neovim ui2 message routing for sticky errors, shell output, and cmdline-style flows (requires Neovim 0.12+).
+- Diffview keymaps under `<leader>g`: `gd` open changes, `gD` toggle, `gH` file history, `gP` vs last commit.
 - `custom.msgarea` helper for closing, resetting, and routing lightweight status output through msgarea.
 - `mini.pick` as the primary picker surface, routed into msgarea when available.
 - Restored `which-key.nvim` with auto-discovery from `desc` keymaps plus `<leader>?` / `<leader><leader>` cheat sheets.

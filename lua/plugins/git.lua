@@ -2,6 +2,30 @@ return {
   {
     'sindrets/diffview.nvim',
     cmd = { 'DiffviewOpen', 'DiffviewClose', 'DiffviewToggle', 'DiffviewFileHistory' },
+    keys = {
+      {
+        '<leader>gd',
+        '<cmd>DiffviewOpen<cr>',
+        desc = 'Diffview all changes',
+      },
+      {
+        '<leader>gD',
+        '<cmd>DiffviewToggle<cr>',
+        desc = 'Diffview toggle',
+      },
+      {
+        '<leader>gH',
+        function()
+          vim.cmd('DiffviewFileHistory ' .. vim.api.nvim_buf_get_name(0))
+        end,
+        desc = 'Diffview file history',
+      },
+      {
+        '<leader>gP',
+        '<cmd>DiffviewOpen HEAD~1<cr>',
+        desc = 'Diffview vs last commit',
+      },
+    },
     config = function()
       local actions = require('diffview.actions')
 
