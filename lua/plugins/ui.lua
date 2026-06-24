@@ -34,11 +34,12 @@ return {
         { '<leader>x', group = 'Diagnostics' },
         { '<leader>c', group = 'Code' },
         { '<leader>s', group = 'Search' },
-        { '<leader>a', group = 'Avante', icon = '󰚩 ' },
+        { '<leader>a', group = 'Cursor Agent', icon = '󰚩 ' },
         { '<leader>9', group = '99' },
         { '<leader>e', group = 'Explorer' },
         { '<leader>q', group = 'Quickfix' },
         { '<leader>m', group = 'Msgarea' },
+        { '<leader>D', group = 'Database' },
       },
     },
     keys = {

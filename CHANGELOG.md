@@ -1,6 +1,8 @@
 ## [Unreleased]
 
 ### Added
+- `felixcuello/neovim-cursor` terminal integration for Cursor Agent (`cursor agent`) with `<leader>aa` toggle, `<leader>an` new session, `<leader>at` select, and `<leader>ar` rename.
+- DataGrip-style SQL workflow via `vim-dadbod`, `vim-dadbod-ui`, and `vim-dadbod-completion` with `<leader>D` keymaps, schema-aware blink completion, `sqlls` LSP, Treesitter `sql` parser, and `sqlfluff` formatting/linting.
 - Lazygit `G` custom command for AI-generated commit messages via `scripts/lazygit-ai-commit.ps1` (Cursor `agent -p`; scope menu for staged vs all changes; `output: terminal` for commit editor).
 - Diffview keymaps under `<leader>g`: `gd` open changes, `gD` toggle, `gH` file history, `gP` vs last commit.
 - `custom.msgarea` helper for closing, resetting, and routing lightweight status output through msgarea.
@@ -12,6 +14,7 @@
 - Added `custom.wtf_cursor` adapter to run wtf diagnose/fix through Cursor CLI `--print` on Windows-safe spawn paths.
 
 ### Changed
+- Disabled `avante.nvim` (Cursor ACP) in favor of terminal-based `neovim-cursor` after Cursor ACP instability.
 - Migrated `nvim-treesitter` and `nvim-treesitter-textobjects` to the `main` branch rewrite for Neovim 0.12 compatibility (fixes render-markdown/Avante `range` nil treesitter errors).
 - Normal-mode `<Esc>` hides msgarea first, then closes hidden windows; `<leader>ms` / `<M-n>` restore collapsed msgarea for scrolling.
 - `wtf.nvim` diagnose/fix status messages now route through msgarea instead of Snacks notifier toasts.
@@ -27,6 +30,8 @@
 - Re-enabled `wilder.nvim` command-line/search UI with `vim_fuzzy_filter` fallback on Windows.
 
 ### Fixed
+- Fixed basedpyright unresolved imports by removing the global `python.pythonPath` override and auto-selecting `.venv` / `venv` in the project root on LSP attach.
+- Fixed `wilder.nvim` popup render crash (`E704` / `E714` in `popupmenu_devicons`) by removing the devicons renderer column from `lua/plugins/wilder.lua`.
 - Hardened `nvim-treesitter` config to avoid startup crash when the plugin directory is missing after a failed Lazy sync.
 - Guarded `render-markdown.nvim` treesitter parse during Avante streaming to avoid `range (a nil value)` crashes when parser nodes are stale.
 - Fixed `msgarea.nvim` startup crash by enabling Neovim ui2 in `config/ui2.lua` before lazy.nvim loads the plugin (ui2 `msg` must exist when `plugin/msgarea.lua` patches `msg_show`).

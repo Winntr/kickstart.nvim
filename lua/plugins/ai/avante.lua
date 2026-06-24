@@ -154,6 +154,8 @@ end
 return {
   {
     'yetone/avante.nvim',
+    -- Disabled: Cursor ACP is unstable; use felixcuello/neovim-cursor (terminal `cursor agent`) instead.
+    enabled = false,
     version = false,
     build = vim.fn.has 'win32' == 1
         and 'powershell -NoProfile -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false'

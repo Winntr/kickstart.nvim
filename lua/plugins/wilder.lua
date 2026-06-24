@@ -33,7 +33,7 @@ return {
         'renderer',
         wilder.popupmenu_renderer {
           highlighter = highlighter,
-          left = { ' ', wilder.popupmenu_devicons() },
+          left = { ' ' },
           right = { ' ', wilder.popupmenu_scrollbar() },
         }
       )

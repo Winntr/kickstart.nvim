@@ -17,6 +17,7 @@ local PARSERS = {
   'typescript',
   'http',
   'json',
+  'sql',
 }
 
 local function install_missing_parsers()

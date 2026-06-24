@@ -1,8 +1,40 @@
 # Troubleshooting
 
-## Agentic Cursor ACP on Windows
+## Cursor Agent terminal (neovim-cursor)
 
-Deprecated: `agentic.nvim` is disabled. Use `avante.nvim` with `provider = "cursor-acp"` instead. The spawn notes below still apply to Avante's ACP client.
+Primary AI agent workflow: `felixcuello/neovim-cursor` runs `cursor agent` in a Neovim split terminal (no ACP stdio).
+
+### Keymaps
+
+| Key | Action |
+|-----|--------|
+| `<leader>aa` | Toggle Cursor agent terminal (normal); send visual selection as `@file:lines` (visual) |
+| `<leader>an` | Create new agent terminal |
+| `<leader>at` | Select agent terminal (fuzzy picker; `vim.ui.select` fallback without Telescope) |
+| `<leader>ar` | Rename active agent terminal |
+
+### Commands
+
+- `:CursorAgent` — toggle agent terminal
+- `:CursorAgentNew [prompt]` — new agent session
+- `:CursorAgentSelect` — picker
+- `:CursorAgentRename [name]` — rename
+- `:CursorAgentList` — list sessions
+
+### If the terminal does not open
+
+1. Confirm `cursor` (non-Windows) or `agent` (Windows) is on PATH.
+2. Run `agent` (Windows) or `cursor agent` (other platforms) in a normal terminal and verify it starts.
+3. Run `:Lazy sync` to install `felixcuello/neovim-cursor`.
+4. Check `:messages` for spawn errors.
+
+### Legacy: Avante Cursor ACP
+
+`avante.nvim` is disabled (`enabled = false` in `lua/plugins/ai/avante.lua`). Notes below are kept for reference if you re-enable ACP.
+
+## Agentic Cursor ACP on Windows (legacy)
+
+Deprecated: `agentic.nvim` is disabled. `avante.nvim` Cursor ACP is also disabled; use `neovim-cursor` above. Spawn notes below apply only if you re-enable an ACP client.
 
 If Avante with `provider = 'cursor-acp'` fails with `Failed to initialize` and `{ code = -32000, message = "disconnected" }`, check how the provider process is launched.
 
@@ -29,7 +61,7 @@ This config applies `lua/custom/patches/agentic_acp_transport.lua` before Avante
 
 Do not point Avante at `agent-hidden.bat` or other wrappers that use `start /b`; those can also spawn extra terminal tabs.
 
-### Debug steps
+### Debug steps (legacy ACP)
 
 1. Run `:AvanteToggle` or `<leader>at` and send a short prompt
 2. Run `:checkhealth` and confirm `cursor-agent` / `agent` is on PATH
@@ -102,11 +134,64 @@ keymaps and make sure `<C-y>` is not mapped to `select_and_accept`.
 ## Wilder on Windows
 
 `wilder.nvim` is enabled and falls back to `wilder.vim_fuzzy_filter()` on
-Windows (where `fzy-lua-native` is not built). If the popup fails to render:
+Windows (where `fzy-lua-native` is not built).
+
+Devicons in the Wilder popup are intentionally disabled in
+`lua/plugins/wilder.lua`. The upstream `wilder.popupmenu_devicons()` Vimscript
+component can fail with `E704: Funcref variable name must start with a capital:
+l:expand` on this Neovim setup, which breaks popup rendering (`E714: List
+required`, `E121: Undefined variable: l:lines`).
+
+If the popup still fails to render:
 
 1. Run `:checkhealth` and confirm no UI ext errors.
 2. Test `:` and `/` modes directly after startup.
 3. Temporarily disable msgarea routing to isolate cmdline UI conflicts.
+
+## LSP (Neovim 0.12 native API)
+
+Inspect LSP with `:LspInfo` (alias for `:checkhealth vim.lsp`).
+
+### basedpyright still runs after removing Mason package
+
+Mason only manages binaries under `nvim-data/mason/`. This config also enables
+`basedpyright` via `vim.lsp.enable('basedpyright')` in `lua/plugins/lsp.lua`.
+If `basedpyright-langserver` is on PATH (for example `~/.local/bin` from pip or
+pipx), Neovim will still start it after a Mason uninstall.
+
+To disable basedpyright entirely:
+
+```vim
+:lua vim.lsp.enable('basedpyright', false)
+```
+
+Or remove `basedpyright` from the `servers` list in `lua/plugins/lsp.lua`.
+
+### Python imports not resolving
+
+basedpyright must use the project virtualenv, not a global `python3` on PATH.
+On attach, this config sets `python.pythonPath` when `.venv` or `venv` exists
+under the LSP root directory.
+
+After changing LSP settings, restart the client from a Python buffer:
+
+```vim
+:lua vim.lsp.stop_client(vim.lsp.get_clients({name='basedpyright'})[1].id, true)
+```
+
+Then reopen the file or run `:edit` to reattach.
+
+Manual override (per buffer session):
+
+```vim
+:LspPyrightSetPythonPath C:/path/to/project/.venv/Scripts/python.exe
+```
+
+### LSP log file is huge
+
+`:checkhealth vim.lsp` reports log size at `stdpath('data')/lsp.log`. Delete or
+truncate that file if it grows large; optionally lower verbosity with
+`:lua vim.lsp.set_log_level('warn')`.
 
 ## Msgarea dismiss and reset
 

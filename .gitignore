@@ -10,3 +10,4 @@ Scripts/WezTermToggle/WeztermToggle.exe
 custom-plugins/99
 /.github
 tmp/
+lua/config/local.lua

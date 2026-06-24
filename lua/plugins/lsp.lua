@@ -11,9 +11,34 @@ return {
       { 'j-hui/fidget.nvim', opts = {} },
     },
     config = function()
+      local function project_python(root)
+        if not root then
+          return nil
+        end
+        local rel = vim.fn.has 'win32' == 1 and 'Scripts/python.exe' or 'bin/python'
+        for _, venv in ipairs { '.venv', 'venv' } do
+          local py = root .. '/' .. venv .. '/' .. rel
+          if vim.uv.fs_stat(py) then
+            return vim.fn.fnamemodify(py, ':p')
+          end
+        end
+        return nil
+      end
+
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('nvim-lsp-attach', { clear = true }),
         callback = function(event)
+          local client = vim.lsp.get_client_by_id(event.data.client_id)
+          if client and client.name == 'basedpyright' then
+            local py = project_python(client.root_dir)
+            if py then
+              client.settings = vim.tbl_deep_extend('force', client.settings or {}, {
+                python = { pythonPath = py },
+              })
+              client:notify('workspace/didChangeConfiguration', { settings = client.settings })
+            end
+          end
+
           local map = function(keys, func, desc, mode)
             vim.keymap.set(mode or 'n', keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
           end
@@ -48,8 +73,12 @@ return {
 
       vim.lsp.config('basedpyright', {
         settings = {
-          typeCheckingMode = 'standard',
-          python = { pythonPath = vim.fn.exepath 'python3' },
+          basedpyright = {
+            analysis = {
+              typeCheckingMode = 'standard',
+              autoSearchPaths = true,
+            },
+          },
         },
       })
 
@@ -151,6 +180,10 @@ return {
         end,
       })
 
+      vim.lsp.config('sqlls', {
+        filetypes = { 'sql', 'mysql', 'plsql', 'pgsql' },
+      })
+
       vim.lsp.config('angularls', {
         cmd = {
           'ngserver',
@@ -163,7 +196,7 @@ return {
           vim.fn.getcwd() .. '/node_modules/@angular/language-server/node_modules',
           '--angularCoreVersion',
         },
-        filetypes = { 'typescript', 'html', 'typescriptreact', 'typescript.tsx', 'htmlangular' },
+        filetypes = { 'typescript', 'html', 'typescriptreact', 'htmlangular' },
         root_markers = { 'angular.json', 'nx.json' },
       })
 
@@ -176,6 +209,7 @@ return {
         'ts_ls',
         'vue_ls',
         'angularls',
+        'sqlls',
       }
 
       for _, server in ipairs(servers) do
@@ -191,8 +225,9 @@ return {
           'typescript-language-server',
           'angular-language-server',
           'vue-language-server',
-          'basedpyright',
           'lua-language-server',
+          'sqlls',
+          'sqlfluff',
         },
       }
     end,

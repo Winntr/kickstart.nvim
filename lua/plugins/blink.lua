@@ -25,7 +25,18 @@ return {
       signature = { enabled = true },
       sources = {
         default = { 'lsp', 'path', 'snippets', 'buffer' },
+        per_filetype = {
+          sql = { 'lsp', 'dadbod', 'path', 'snippets', 'buffer' },
+          mysql = { 'lsp', 'dadbod', 'path', 'snippets', 'buffer' },
+          plsql = { 'lsp', 'dadbod', 'path', 'snippets', 'buffer' },
+          pgsql = { 'lsp', 'dadbod', 'path', 'snippets', 'buffer' },
+        },
         providers = {
+          dadbod = {
+            name = 'Dadbod',
+            module = 'vim_dadbod_completion.blink',
+            score_offset = 3,
+          },
           avante_commands = {
             name = 'avante_commands',
             module = 'blink.compat.source',

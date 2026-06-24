@@ -28,6 +28,15 @@ return {
         json = { "prettierd", "prettier", stop_after_first = true },
         yaml = { "prettierd", "prettier", stop_after_first = true },
         markdown = { "prettierd", "prettier", stop_after_first = true },
+        sql = { "sqlfluff" },
+        mysql = { "sqlfluff" },
+        plsql = { "sqlfluff" },
+        pgsql = { "sqlfluff" },
+      },
+      formatters = {
+        sqlfluff = {
+          args = { 'format', '--dialect=ansi', '-' },
+        },
       },
       format_on_save = {
         timeout_ms = 500,
@@ -46,6 +55,10 @@ return {
         python = { "ruff" },
         javascript = { "eslint_d" },
         typescript = { "eslint_d" },
+        sql = { "sqlfluff" },
+        mysql = { "sqlfluff" },
+        plsql = { "sqlfluff" },
+        pgsql = { "sqlfluff" },
       }
 
       vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost" }, {
