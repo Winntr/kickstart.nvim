@@ -131,6 +131,24 @@ return {
   },
 
   {
+    'Bekaboo/dropbar.nvim',
+    event = { 'BufReadPost', 'BufNewFile' },
+    dependencies = {
+      {
+        'romgrk/fzy-lua-native',
+        build = 'make',
+        cond = vim.fn.has 'win32' == 0,
+        optional = true,
+      },
+    },
+    config = function()
+      vim.keymap.set('n', '<leader>ls', function()
+        require('dropbar.api').pick()
+      end, { desc = 'Symbol breadcrumbs' })
+    end,
+  },
+
+  {
     'stevearc/aerial.nvim',
     cmd = { 'AerialToggle', 'AerialOpen', 'AerialNavToggle' },
     dependencies = {

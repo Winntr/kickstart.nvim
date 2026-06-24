@@ -14,7 +14,7 @@
 - Added `custom.wtf_cursor` adapter to run wtf diagnose/fix through Cursor CLI `--print` on Windows-safe spawn paths.
 
 ### Changed
-- Disabled `avante.nvim` (Cursor ACP) in favor of terminal-based `neovim-cursor` after Cursor ACP instability.
+- Restored `dropbar.nvim` winbar breadcrumbs (file path + symbol context) removed during the minimal config refactor.
 - Migrated `nvim-treesitter` and `nvim-treesitter-textobjects` to the `main` branch rewrite for Neovim 0.12 compatibility (fixes render-markdown/Avante `range` nil treesitter errors).
 - Normal-mode `<Esc>` hides msgarea first, then closes hidden windows; `<leader>ms` / `<M-n>` restore collapsed msgarea for scrolling.
 - `wtf.nvim` diagnose/fix status messages now route through msgarea instead of Snacks notifier toasts.
