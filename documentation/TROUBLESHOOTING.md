@@ -28,6 +28,21 @@ Primary AI agent workflow: `felixcuello/neovim-cursor` runs `cursor agent` in a 
 3. Run `:Lazy sync` to install `felixcuello/neovim-cursor`.
 4. Check `:messages` for spawn errors.
 
+### Esc in the agent terminal
+
+`neovim-cursor` maps single `<Esc>` to hide the split, which blocks Cursor CLI shortcuts
+and conflicts with double-Esc terminal normal mode. This config patches agent buffers in
+`lua/custom/cursor_terminal_esc.lua`:
+
+| Key | Mode | Action |
+|-----|------|--------|
+| `<Esc>` | Terminal insert | Sent to the agent CLI |
+| `<Esc><Esc>` | Terminal insert | Neovim normal mode in the split |
+| `<Esc><Esc>` | Normal (in split) | Hide the agent window |
+| `<leader>aa` | Normal / visual | Toggle agent (unchanged) |
+
+Reopen the agent (`<leader>aa`) after updating this config so existing buffers pick up the patch.
+
 ### Legacy: Avante Cursor ACP
 
 `avante.nvim` is disabled (`enabled = false` in `lua/plugins/ai/avante.lua`). Notes below are kept for reference if you re-enable ACP.

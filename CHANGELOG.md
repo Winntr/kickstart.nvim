@@ -30,6 +30,7 @@
 - Re-enabled `wilder.nvim` command-line/search UI with `vim_fuzzy_filter` fallback on Windows.
 
 ### Fixed
+- Fixed Cursor agent terminal single `<Esc>` hiding the split (blocking CLI keybinds) by patching `neovim-cursor` buffers to use Esc/Esc Esc behavior in `lua/custom/cursor_terminal_esc.lua`.
 - Fixed basedpyright unresolved imports by removing the global `python.pythonPath` override and auto-selecting `.venv` / `venv` in the project root on LSP attach.
 - Fixed `wilder.nvim` popup render crash (`E704` / `E714` in `popupmenu_devicons`) by removing the devicons renderer column from `lua/plugins/wilder.lua`.
 - Hardened `nvim-treesitter` config to avoid startup crash when the plugin directory is missing after a failed Lazy sync.
