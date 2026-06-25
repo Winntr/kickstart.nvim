@@ -30,7 +30,7 @@
 - Re-enabled `wilder.nvim` command-line/search UI with `vim_fuzzy_filter` fallback on Windows.
 
 ### Fixed
-- Fixed Trouble workspace diagnostics showing no results by populating the quickfix list from live `vim.diagnostic` data (`setqflist` + `qflist` mode) instead of Trouble's stale diagnostics cache; buffer view uses `setloclist` + `loclist`.
+- Fixed Trouble workspace diagnostics by requesting `vim.lsp.buf.workspace_diagnostics()`, using basedpyright `disablePullDiagnostics` + `diagnosticMode = 'workspace'` so unopened project files are analyzed, and debouncing Trouble open until diagnostics arrive.
 - Fixed basedpyright unresolved imports by removing the global `python.pythonPath` override and auto-selecting `.venv` / `venv` in the project root on LSP attach.
 - Fixed `wilder.nvim` popup render crash (`E704` / `E714` in `popupmenu_devicons`) by removing the devicons renderer column from `lua/plugins/wilder.lua`.
 - Hardened `nvim-treesitter` config to avoid startup crash when the plugin directory is missing after a failed Lazy sync.

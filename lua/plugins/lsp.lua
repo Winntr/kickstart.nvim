@@ -39,6 +39,11 @@ return {
             })
             client.settings = settings
             client:notify('workspace/didChangeConfiguration', { settings = settings })
+            vim.defer_fn(function()
+              if client:supports_method('workspace/diagnostic') then
+                vim.lsp.buf.workspace_diagnostics { client_id = client.id }
+              end
+            end, 500)
           end
 
           local map = function(keys, func, desc, mode)
@@ -74,6 +79,8 @@ return {
       end
 
       vim.lsp.config('basedpyright', {
+        -- ponytail: pull diagnostics break workspace/diagnostic on basedpyright; push + workspace mode publishes unopened files
+        init_options = { disablePullDiagnostics = true },
         settings = {
           basedpyright = {
             analysis = {

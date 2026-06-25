@@ -88,10 +88,7 @@ return {
       {
         '<leader>xx',
         function()
-          -- ponytail: trouble's diagnostics source caches per-buffer; workspace
-          -- aggregation (cache[0]) can stay empty. setqflist reads vim.diagnostic live.
-          vim.diagnostic.setqflist { open = false, title = 'Workspace diagnostics' }
-          require('trouble').toggle('qflist')
+          require('custom.workspace_diagnostics').open_trouble()
         end,
         desc = 'Workspace diagnostics (Trouble)',
       },

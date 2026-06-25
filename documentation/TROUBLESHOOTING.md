@@ -132,19 +132,20 @@ single diagnostic explain/fix prompts, `--print` is the correct transport.
 
 ## Trouble workspace diagnostics empty
 
-`<leader>xx` opens Trouble in `qflist` mode after `vim.diagnostic.setqflist()`.
-That reads live diagnostic state instead of Trouble's built-in `diagnostics`
-source cache, which can report zero workspace items even when buffer diagnostics
-exist.
+You do **not** need every file open in a buffer. Workspace-wide diagnostics come from the LSP analyzing the project and Neovim storing results (often on hidden/unloaded buffers).
+
+This config uses:
+
+- basedpyright `diagnosticMode = 'workspace'` (analyze the whole project, not just open files)
+- `init_options.disablePullDiagnostics = true` (basedpyright + Neovim pull diagnostics are unreliable without this)
+- `<leader>xx` calls `vim.lsp.buf.workspace_diagnostics()` then opens Trouble after diagnostics stream in
 
 If workspace still shows no items:
 
-1. Confirm the current buffer has diagnostics: `:lua vim.print(#vim.diagnostic.get(0))`
-2. Confirm project-wide count: `:lua vim.print(#vim.diagnostic.get(nil))`
-3. For Python, restart LSP (`:LspRestart basedpyright`) after opening the project
-   so `diagnosticMode = 'workspace'` is applied on attach.
-4. Workspace diagnostics only include files the LSP has analyzed; unopened files
-   appear after basedpyright publishes them (may take a few seconds on large repos).
+1. Open any file in the project so basedpyright attaches, then wait a few seconds for the workspace scan.
+2. Confirm counts: `:lua vim.print('buffer', #vim.diagnostic.get(0), 'all', #vim.diagnostic.get(nil))`
+3. Restart LSP: `:LspRestart basedpyright` (required after `disablePullDiagnostics` if the server was already running).
+4. Large repos can take 10–30+ seconds on first scan; press `<leader>xx` again after waiting.
 
 Buffer-only view: `<leader>xX` (`setloclist` + Trouble `loclist`).
 
