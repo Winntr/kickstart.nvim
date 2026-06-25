@@ -31,12 +31,14 @@ return {
           local client = vim.lsp.get_client_by_id(event.data.client_id)
           if client and client.name == 'basedpyright' then
             local py = project_python(client.root_dir)
-            if py then
-              client.settings = vim.tbl_deep_extend('force', client.settings or {}, {
-                python = { pythonPath = py },
-              })
-              client:notify('workspace/didChangeConfiguration', { settings = client.settings })
-            end
+            local settings = vim.tbl_deep_extend('force', client.settings or {}, {
+              basedpyright = {
+                analysis = { diagnosticMode = 'workspace' },
+              },
+              python = py and { pythonPath = py } or {},
+            })
+            client.settings = settings
+            client:notify('workspace/didChangeConfiguration', { settings = settings })
           end
 
           local map = function(keys, func, desc, mode)
@@ -77,6 +79,7 @@ return {
             analysis = {
               typeCheckingMode = 'standard',
               autoSearchPaths = true,
+              diagnosticMode = 'workspace',
             },
           },
         },

@@ -84,21 +84,24 @@ return {
 
   {
     'folke/trouble.nvim',
-    opts = {},
     keys = {
       {
         '<leader>xx',
         function()
-          require('trouble').toggle 'diagnostics'
+          -- ponytail: trouble's diagnostics source caches per-buffer; workspace
+          -- aggregation (cache[0]) can stay empty. setqflist reads vim.diagnostic live.
+          vim.diagnostic.setqflist { open = false, title = 'Workspace diagnostics' }
+          require('trouble').toggle('qflist')
         end,
-        desc = 'Diagnostics (Trouble)',
+        desc = 'Workspace diagnostics (Trouble)',
       },
       {
         '<leader>xX',
         function()
-          require('trouble').toggle 'workspace_diagnostics'
+          vim.diagnostic.setloclist { open = false, title = 'Buffer diagnostics' }
+          require('trouble').toggle('loclist')
         end,
-        desc = 'Workspace diagnostics',
+        desc = 'Buffer diagnostics (Trouble)',
       },
     },
   },

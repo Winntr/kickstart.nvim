@@ -130,6 +130,24 @@ single diagnostic explain/fix prompts, `--print` is the correct transport.
 3. Verify `<leader>awd` / `<leader>awf` call `custom.wtf_cursor` (not `wtf.diagnose` directly).
 4. Check Neovim messages for stderr from the Cursor CLI subprocess.
 
+## Trouble workspace diagnostics empty
+
+`<leader>xx` opens Trouble in `qflist` mode after `vim.diagnostic.setqflist()`.
+That reads live diagnostic state instead of Trouble's built-in `diagnostics`
+source cache, which can report zero workspace items even when buffer diagnostics
+exist.
+
+If workspace still shows no items:
+
+1. Confirm the current buffer has diagnostics: `:lua vim.print(#vim.diagnostic.get(0))`
+2. Confirm project-wide count: `:lua vim.print(#vim.diagnostic.get(nil))`
+3. For Python, restart LSP (`:LspRestart basedpyright`) after opening the project
+   so `diagnosticMode = 'workspace'` is applied on attach.
+4. Workspace diagnostics only include files the LSP has analyzed; unopened files
+   appear after basedpyright publishes them (may take a few seconds on large repos).
+
+Buffer-only view: `<leader>xX` (`setloclist` + Trouble `loclist`).
+
 ## blink.cmp and copilot.lua coexistence
 
 This config uses:
