@@ -33,6 +33,7 @@ return {
         { '<leader>d', group = 'Debug' },
         { '<leader>x', group = 'Diagnostics' },
         { '<leader>c', group = 'Code' },
+        { '<leader>w', group = 'Windows' },
         { '<leader>s', group = 'Search' },
         { '<leader>a', group = 'Cursor Agent', icon = '󰚩 ' },
         { '<leader>9', group = '99' },
@@ -40,6 +41,7 @@ return {
         { '<leader>q', group = 'Quickfix' },
         { '<leader>m', group = 'Msgarea' },
         { '<leader>D', group = 'Database' },
+        { '<leader>t', group = 'Tasks' },
       },
     },
     keys = {

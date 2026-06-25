@@ -59,3 +59,5 @@ map('n', '<leader>ao', '<cmd>AerialToggle!<cr>', { desc = 'Symbol outline' })
 
 map('n', '<leader>vl', '<cmd>Lazy<cr>', { desc = 'Lazy' })
 map('n', '<leader>vm', '<cmd>Mason<cr>', { desc = 'Mason' })
+
+require('custom.windows').setup()

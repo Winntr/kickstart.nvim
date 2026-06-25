@@ -1,7 +1,15 @@
 ## [Unreleased]
 
+### Fixed
+- Task panel crash on open: nui tree nodes expose fields on the node directly (`node.id`), not `node.data`.
+- Task panel toggle after hide: nui clears split `winid` when hidden; `is_open()` now guards before `nvim_win_is_valid`.
+
 ### Added
+- Task action menu on `<CR>` in the panel: state-aware options via `nui.menu` (Run, Show/Hide, Stop, Restart, Kill).
+- `custom.tasks` + `custom.tasks_ui` Overseer-style workspace task panel: task list + live output pane, hidden PTY buffers, `<leader>tm` toggle, list keymaps (`r` run, `s` stop, `x` kill, `R` restart, `i` interact), `.nvim/tasks.lua` persistence; `:TaskUI`, `:TaskRun`, `:TaskShow`, `:TaskStop`, `:TaskKill`, `:TaskHide`, `:TaskAdd`.
 - `felixcuello/neovim-cursor` terminal integration for Cursor Agent (`cursor agent`) with `<leader>aa` toggle, `<leader>an` new session, `<leader>at` select, and `<leader>ar` rename.
+- `custom.cursor_chat` helpers and Avante-parity hotkeys to attach context to the agent terminal: `<leader>as` (selection), `<leader>ac` (current file), `<leader>aB` (all named buffers), `<leader>af` (focus agent); visual `<leader>aa` now shows the agent without toggling it closed.
+- `custom.windows` window and buffer controls under `<leader>w` (splits, close, equalize, resize, buffer next/prev/close) plus `<S-Arrow>` split resizing; `:Cvsplit` / `:Chsplit` user commands restored.
 - DataGrip-style SQL workflow via `vim-dadbod`, `vim-dadbod-ui`, and `vim-dadbod-completion` with `<leader>D` keymaps, schema-aware blink completion, `sqlls` LSP, Treesitter `sql` parser, and `sqlfluff` formatting/linting.
 - Lazygit `G` custom command for AI-generated commit messages via `scripts/lazygit-ai-commit.ps1` (Cursor `agent -p`; scope menu for staged vs all changes; `output: terminal` for commit editor).
 - Diffview keymaps under `<leader>g`: `gd` open changes, `gD` toggle, `gH` file history, `gP` vs last commit.
@@ -13,8 +21,12 @@
 - Added `blink.cmp` (pinned to `1.*`) with `blink.compat` for Avante completion sources.
 - Added `custom.wtf_cursor` adapter to run wtf diagnose/fix through Cursor CLI `--print` on Windows-safe spawn paths.
 
+### Fixed
+- Task panel crash on open: nui tree nodes expose fields on the node directly (`node.id`), not `node.data`.
+
 ### Changed
-- Restored `dropbar.nvim` winbar breadcrumbs (file path + symbol context) removed during the minimal config refactor.
+- Task panel UI is fully nui.nvim: `nui.layout` + `nui.split` + `nui.tree` for list/output, `nui.input` for add-task prompts; removed Snacks dependency from task plugin spec.
+- Task stop (`<leader>ts`, `s` in panel) focuses output and sends Ctrl+C for interactive y/n prompts.
 - Migrated `nvim-treesitter` and `nvim-treesitter-textobjects` to the `main` branch rewrite for Neovim 0.12 compatibility (fixes render-markdown/Avante `range` nil treesitter errors).
 - Normal-mode `<Esc>` hides msgarea first, then closes hidden windows; `<leader>ms` / `<M-n>` restore collapsed msgarea for scrolling.
 - `wtf.nvim` diagnose/fix status messages now route through msgarea instead of Snacks notifier toasts.

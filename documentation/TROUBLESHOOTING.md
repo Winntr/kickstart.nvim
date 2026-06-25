@@ -1,17 +1,93 @@
 # Troubleshooting
 
+## Workspace task panel (`custom.tasks` + `custom.tasks_ui`)
+
+Overseer-style bottom panel built with **nui.nvim** (rounded borders, tree task list, live output pane). Processes use PTY buffers displayed in the output split.
+
+### Open the panel
+
+| Key | Action |
+|-----|--------|
+| `<leader>tm` | Toggle task panel |
+| `<leader>tv` | Open task panel |
+| `:TaskUI` | Toggle task panel |
+
+### Panel layout
+
+- **Tasks** (top): `nui.tree` list with status icons and command
+- **Output** (bottom): live terminal buffer for the selected task
+
+● running  ◐ stopped  ○ not started
+
+Footer on the task list shows keybindings.
+
+### List keymaps
+
+| Key | Action |
+|-----|--------|
+| `r` | Run selected task |
+| `s` | Stop (Ctrl+C; answer y/n in output) |
+| `x` | Kill |
+| `R` | Restart |
+| `i` | Interact (focus output, terminal mode) |
+| `<CR>` | State-aware action menu (Run, Show, Stop, Restart, Kill, etc.) |
+| `a` | Add task |
+| `e` | Edit `.nvim/tasks.lua` |
+| `q` / `<Esc>` | Close panel (processes keep running) |
+
+### Global shortcuts
+
+| Key | Action |
+|-----|--------|
+| `<leader>tr` | Open panel or run selected task |
+| `<leader>ts` | Stop current/selected task |
+| `<leader>tK` | Kill current/selected task |
+| `<leader>th` / `<leader>tH` | Close task panel |
+| `<leader>ta` | Add task |
+
+### Workspace file
+
+Tasks are stored at `<project_root>/.nvim/tasks.lua`:
+
+```lua
+---@type WorkspaceTask[]
+return {
+  { name = "dev", cmd = "just dev" },
+}
+```
+
+### Commands
+
+- `:TaskRun [name]` — run task (opens panel if needed)
+- `:TaskShow [name]` — show output in panel
+- `:TaskStop [name]` — stop with interactive prompts in output pane
+- `:TaskKill [name]` — force kill
+- `:TaskHide` — close panel
+- `:TaskAdd` — add task interactively
+
+Implementation: `lua/custom/tasks.lua`, `lua/custom/tasks_ui.lua` (nui.nvim).
+
 ## Cursor Agent terminal (neovim-cursor)
 
 Primary AI agent workflow: `felixcuello/neovim-cursor` runs `cursor agent` in a Neovim split terminal (no ACP stdio).
 
 ### Keymaps
 
-| Key | Action |
-|-----|--------|
-| `<leader>aa` | Toggle Cursor agent terminal (normal); send visual selection as `@file:lines` (visual) |
-| `<leader>an` | Create new agent terminal |
-| `<leader>at` | Select agent terminal (fuzzy picker; `vim.ui.select` fallback without Telescope) |
-| `<leader>ar` | Rename active agent terminal |
+| Key | Mode | Action |
+|-----|------|--------|
+| `<leader>aa` | Normal | Toggle Cursor agent terminal |
+| `<leader>aa` | Visual | Show agent and send selection as `@file:lines` (does not hide an open agent) |
+| `<leader>as` | Visual | Send selection to agent (`@file:lines`) |
+| `<leader>ac` | Normal | Send current file to agent (`@file`) |
+| `<leader>aB` | Normal | Send all named open buffers to agent (one `@file` per line) |
+| `<leader>af` | Normal | Focus/show agent terminal |
+| `<leader>an` | Normal | Create new agent terminal |
+| `<leader>at` | Normal | Select agent terminal (fuzzy picker; `vim.ui.select` fallback without Telescope) |
+| `<leader>ar` | Normal | Rename active agent terminal |
+
+Context is sent as Cursor `@` references (file path with optional line range), not inline buffer text. Unsaved buffers with no path are skipped with a warning; save the file first.
+
+Implementation: `lua/custom/cursor_chat.lua` (wired from `lua/plugins/ai/neovim_cursor.lua`).
 
 ### Commands
 
@@ -39,7 +115,8 @@ and conflicts with double-Esc terminal normal mode. This config patches agent bu
 | `<Esc>` | Terminal insert | Sent to the agent CLI |
 | `<Esc><Esc>` | Terminal insert | Neovim normal mode in the split |
 | `<Esc><Esc>` | Normal (in split) | Hide the agent window |
-| `<leader>aa` | Normal / visual | Toggle agent (unchanged) |
+| `<leader>aa` | Normal | Toggle agent |
+| `<leader>aa` | Visual | Send selection to agent (show-only) |
 
 Reopen the agent (`<leader>aa`) after updating this config so existing buffers pick up the patch.
 
