@@ -431,7 +431,16 @@ end
 --- @param on_done fun(value: string?)
 function M.prompt(opts, on_done)
   local default = opts.default or ''
-  local input = Input({
+  local finished = false
+  local function finish(value)
+    if finished then
+      return
+    end
+    finished = true
+    on_done(value)
+  end
+
+  local input_ui = Input({
     relative = 'editor',
     position = '50%',
     size = {
@@ -448,18 +457,16 @@ function M.prompt(opts, on_done)
     prompt = '> ',
     default_value = default,
     on_submit = function(value)
-      input:unmount()
-      on_done(value)
+      finish(value)
     end,
     on_close = function()
-      on_done(nil)
+      finish(nil)
     end,
   })
-  input:map('n', '<Esc>', function()
-    input:unmount()
-    on_done(nil)
+  input_ui:map('n', '<Esc>', function()
+    input_ui:unmount()
   end, { noremap = true })
-  input:mount()
+  input_ui:mount()
 end
 
 function M.prompt_add()

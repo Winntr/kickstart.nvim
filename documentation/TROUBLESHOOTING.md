@@ -232,6 +232,7 @@ This config uses:
 
 - `blink.cmp` for popup completion (`Tab`, `S-Tab`, `CR`)
 - `copilot.lua` for inline ghost text (`<C-y>` accept)
+- `blink-emoji.nvim` for `:name` emoji completion in insert mode (replaces legacy `cmp-emoji`)
 
 `vim.g.ai_cmp = false` in `lua/config/options.lua` prevents Copilot from trying
 to own completion menu behavior.

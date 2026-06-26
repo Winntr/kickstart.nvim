@@ -1,11 +1,13 @@
 ## [Unreleased]
 
 ### Fixed
+- Task add prompt crash: nui `Input` unmounts before `on_submit`; removed redundant `unmount()` and fixed callback closure over the input instance.
 - Task panel crash on open: nui tree nodes expose fields on the node directly (`node.id`), not `node.data`.
 - Task panel toggle after hide: nui clears split `winid` when hidden; `is_open()` now guards before `nvim_win_is_valid`.
 
 ### Added
 - Task action menu on `<CR>` in the panel: state-aware options via `nui.menu` (Run, Show/Hide, Stop, Restart, Kill).
+- `moyiz/blink-emoji.nvim` emoji completion in insert mode (`:smile` → 😄) via blink.cmp.
 - `custom.tasks` + `custom.tasks_ui` Overseer-style workspace task panel: task list + live output pane, hidden PTY buffers, `<leader>tm` toggle, list keymaps (`r` run, `s` stop, `x` kill, `R` restart, `i` interact), `.nvim/tasks.lua` persistence; `:TaskUI`, `:TaskRun`, `:TaskShow`, `:TaskStop`, `:TaskKill`, `:TaskHide`, `:TaskAdd`.
 - `felixcuello/neovim-cursor` terminal integration for Cursor Agent (`cursor agent`) with `<leader>aa` toggle, `<leader>an` new session, `<leader>at` select, and `<leader>ar` rename.
 - `custom.cursor_chat` helpers and Avante-parity hotkeys to attach context to the agent terminal: `<leader>as` (selection), `<leader>ac` (current file), `<leader>aB` (all named buffers), `<leader>af` (focus agent); visual `<leader>aa` now shows the agent without toggling it closed.

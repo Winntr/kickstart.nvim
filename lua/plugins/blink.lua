@@ -5,6 +5,7 @@ return {
     event = { 'InsertEnter', 'CmdlineEnter' },
     dependencies = {
       'saghen/blink.compat',
+      'moyiz/blink-emoji.nvim',
       'L3MON4D3/LuaSnip',
       'rafamadriz/friendly-snippets',
     },
@@ -24,7 +25,7 @@ return {
       },
       signature = { enabled = true },
       sources = {
-        default = { 'lsp', 'path', 'snippets', 'buffer' },
+        default = { 'lsp', 'path', 'snippets', 'buffer', 'emoji' },
         per_filetype = {
           sql = { 'lsp', 'dadbod', 'path', 'snippets', 'buffer' },
           mysql = { 'lsp', 'dadbod', 'path', 'snippets', 'buffer' },
@@ -56,6 +57,14 @@ return {
             name = 'avante_shortcuts',
             module = 'blink.compat.source',
             score_offset = 1000,
+          },
+          emoji = {
+            name = 'Emoji',
+            module = 'blink-emoji',
+            score_offset = 15,
+            opts = {
+              insert = true,
+            },
           },
         },
       },
