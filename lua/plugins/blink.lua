@@ -11,8 +11,17 @@ return {
     },
     opts = {
       keymap = {
-        preset = 'default',
-        ['<C-y>'] = {},
+        preset = 'super-tab',
+        ['<C-y>'] = {}, -- copilot.lua ghost text accept
+        ['<C-CR>'] = {
+          function(cmp)
+            if cmp.is_menu_visible() then
+              return cmp.accept()
+            end
+            return false
+          end,
+          'fallback',
+        },
       },
       appearance = {
         nerd_font_variant = 'mono',
@@ -22,15 +31,22 @@ return {
       },
       completion = {
         ghost_text = { enabled = false },
+        list = {
+          selection = {
+            preselect = function(ctx)
+              return not require('blink.cmp').snippet_active({ direction = 1 })
+            end,
+          },
+        },
       },
       signature = { enabled = true },
       sources = {
         default = { 'lsp', 'path', 'snippets', 'buffer', 'emoji' },
         per_filetype = {
-          sql = { 'lsp', 'dadbod', 'path', 'snippets', 'buffer' },
-          mysql = { 'lsp', 'dadbod', 'path', 'snippets', 'buffer' },
-          plsql = { 'lsp', 'dadbod', 'path', 'snippets', 'buffer' },
-          pgsql = { 'lsp', 'dadbod', 'path', 'snippets', 'buffer' },
+          sql = { 'lsp', 'dadbod', 'path', 'snippets', 'buffer', 'emoji' },
+          mysql = { 'lsp', 'dadbod', 'path', 'snippets', 'buffer', 'emoji' },
+          plsql = { 'lsp', 'dadbod', 'path', 'snippets', 'buffer', 'emoji' },
+          pgsql = { 'lsp', 'dadbod', 'path', 'snippets', 'buffer', 'emoji' },
         },
         providers = {
           dadbod = {
@@ -61,7 +77,8 @@ return {
           emoji = {
             name = 'Emoji',
             module = 'blink-emoji',
-            score_offset = 15,
+            score_offset = 50,
+            min_keyword_length = 0,
             opts = {
               insert = true,
             },

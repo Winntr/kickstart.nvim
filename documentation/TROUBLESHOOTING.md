@@ -230,18 +230,25 @@ Buffer-only view: `<leader>xX` (`setloclist` + Trouble `loclist`).
 
 This config uses:
 
-- `blink.cmp` for popup completion (`Tab`, `S-Tab`, `CR`)
+- `blink.cmp` for popup completion (see keymap table below)
 - `copilot.lua` for inline ghost text (`<C-y>` accept)
 - `blink-emoji.nvim` for `:name` emoji completion in insert mode (replaces legacy `cmp-emoji`)
 
-`vim.g.ai_cmp = false` in `lua/config/options.lua` prevents Copilot from trying
-to own completion menu behavior.
+### blink completion keys (insert mode)
 
-`lua/plugins/blink.lua` also toggles `vim.b.copilot_suggestion_hidden` on
-`BlinkCmpMenuOpen` and `BlinkCmpMenuClose` so ghost text and menu do not fight.
+| Key | Action |
+|-----|--------|
+| `:` then name (e.g. `:smile`) | Open emoji menu |
+| **Tab** | Accept selected item (or first match); falls back to snippet tab stops |
+| **Ctrl-Enter** | Accept highlighted completion item (menu must be open) |
+| **Enter** | New line (normal insert behavior) |
+| **↑ / ↓** | Previous / next item (live preview with auto-insert) |
+| **Ctrl-Space** | Open completion menu manually |
+| **Ctrl-e** | Cancel / undo auto-insert preview |
 
-If `<C-y>` confirms a menu item instead of accepting Copilot text, check blink
-keymaps and make sure `<C-y>` is not mapped to `select_and_accept`.
+**Ctrl-y** is reserved for Copilot, not blink.
+
+`lua/plugins/blink.lua` uses the `super-tab` preset; **Ctrl-Enter** accepts when the menu is open (Enter stays newline).
 
 ## Wilder on Windows
 
