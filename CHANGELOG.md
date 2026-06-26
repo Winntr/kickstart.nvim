@@ -27,7 +27,7 @@
 - Task panel crash on open: nui tree nodes expose fields on the node directly (`node.id`), not `node.data`.
 
 ### Changed
-- blink.cmp keymaps: `super-tab` preset; **Ctrl-Enter** accepts completions when the menu is open (Enter remains newline; `Ctrl-y` stays Copilot-only).
+- Lazygit AI commit (`G`): spawn Cursor Agent `node.exe` directly with `--print --model composer-2.5-fast`, diff truncation, and `CURSOR_COMMIT_MODEL` override (avoids agent.cmd double-PowerShell hop).
 - Task stop (`<leader>ts`, `s` in panel) focuses output and sends Ctrl+C for interactive y/n prompts.
 - Migrated `nvim-treesitter` and `nvim-treesitter-textobjects` to the `main` branch rewrite for Neovim 0.12 compatibility (fixes render-markdown/Avante `range` nil treesitter errors).
 - Normal-mode `<Esc>` hides msgarea first, then closes hidden windows; `<leader>ms` / `<M-n>` restore collapsed msgarea for scrolling.

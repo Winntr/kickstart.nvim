@@ -1,5 +1,39 @@
 # Troubleshooting
 
+## Lazygit AI commit (`G` in lazygit)
+
+Triggered from `<leader>gg` → lazygit → **`G`** (custom command). Runs `scripts/lazygit-ai-commit.ps1` via PowerShell.
+
+### Model and initialization
+
+| Setting | Value |
+|---------|--------|
+| **Model** | `composer-2.5-fast` (override: `$env:CURSOR_COMMIT_MODEL`) |
+| **Mode** | Cursor Agent `--print` (one-shot, not ACP) |
+| **Binary** | `%LOCALAPPDATA%\cursor-agent\versions\<latest>\node.exe index.js` (direct; skips `agent.cmd` → PowerShell wrapper) |
+| **Cache** | `NODE_COMPILE_CACHE` → `%LOCALAPPDATA%\cursor-compile-cache` |
+
+Other AI tools in this config use heavier models on purpose (`composer-2.5` for ACP/99). Commit messages use the fast model only.
+
+### Why it was slow (and what changed)
+
+1. **Triple shell hop** — lazygit → PowerShell → `agent.cmd` → PowerShell → `node.exe`. Script now calls `node.exe` directly.
+2. **No model pin** — previously relied on CLI default; now explicitly `composer-2.5-fast`.
+3. **Full diff every time** — diffs truncate at 32k chars; prefer **Staged only** (`s`) when possible.
+4. **Cold start** — each `G` still spawns a fresh Agent process (unavoidable with `--print`). First run after boot is slower; `NODE_COMPILE_CACHE` helps subsequent runs.
+
+### Speed tips
+
+- Stage hunks first, then choose **Staged only** in the menu.
+- Set a faster model if needed: `$env:CURSOR_COMMIT_MODEL = 'gpt-5.5-low'` (PowerShell profile or system env).
+- Large binary-only diffs: stage selectively or commit without `G`.
+
+### Errors
+
+- `Cursor agent not found` — install/update Cursor CLI (`agent` on PATH or Cursor desktop app).
+- `Nothing staged` / `No uncommitted changes` — pick the other scope in the menu.
+- `Failed to generate commit message` — run `agent models` in a terminal; check network and Cursor login.
+
 ## Workspace task panel (`custom.tasks` + `custom.tasks_ui`)
 
 Overseer-style bottom panel built with **nui.nvim** (rounded borders, tree task list, live output pane). Processes use PTY buffers displayed in the output split.

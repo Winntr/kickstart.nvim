@@ -4,6 +4,9 @@ local M = {}
 --- CLI `--model` id (see `agent models`).
 M.MODEL_COMPOSER_25 = 'composer-2.5'
 
+--- Fast model for one-shot scripts (lazygit AI commit, etc.).
+M.MODEL_COMMIT = 'composer-2.5-fast'
+
 --- ACP session config option value: display name (not the CLI slug).
 --- Cursor ACP rejects raw ids like `composer-2.5` with "Invalid model value".
 M.ACP_MODEL_DISPLAY = 'Composer 2.5'
