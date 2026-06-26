@@ -14,7 +14,8 @@ Overseer-style bottom panel built with **nui.nvim** (rounded borders, tree task 
 
 ### Panel layout
 
-- **Tasks** (top): `nui.tree` list with status icons and command
+- **Shell** (optional, above tasks): interactive `$SHELL` in project root — `T` or `<leader>tT`
+- **Tasks** (middle): `nui.tree` list with status icons and command
 - **Output** (bottom): live terminal buffer for the selected task
 
 ● running  ◐ stopped  ○ not started
@@ -29,6 +30,7 @@ Footer on the task list shows keybindings.
 | `s` | Stop (Ctrl+C; answer y/n in output) |
 | `x` | Kill |
 | `R` | Restart |
+| `T` | Toggle shell above panel |
 | `i` | Interact (focus output, terminal mode) |
 | `<CR>` | State-aware action menu (Run, Show, Stop, Restart, Kill, etc.) |
 | `a` | Add task |
@@ -44,6 +46,7 @@ Footer on the task list shows keybindings.
 | `<leader>tK` | Kill current/selected task |
 | `<leader>th` / `<leader>tH` | Close task panel |
 | `<leader>ta` | Add task |
+| `<leader>tT` | Toggle shell above task panel |
 
 ### Workspace file
 
@@ -64,6 +67,7 @@ return {
 - `:TaskKill [name]` — force kill
 - `:TaskHide` — close panel
 - `:TaskAdd` — add task interactively
+- `:TaskTerminal` — toggle shell above task panel
 
 Implementation: `lua/custom/tasks.lua`, `lua/custom/tasks_ui.lua` (nui.nvim).
 

@@ -11,7 +11,7 @@ local M = {}
 ---@field buf integer
 ---@field job_id integer
 
----@alias TaskAction 'run' | 'show' | 'restart' | 'stop' | 'kill' | 'hide'
+---@alias TaskAction 'run' | 'show' | 'restart' | 'stop' | 'kill' | 'hide' | 'shell'
 
 ---@class TaskActionItem
 ---@field id TaskAction
@@ -418,6 +418,12 @@ function M.actions_for(task)
     })
   end
 
+  table.insert(actions, {
+    id = 'shell',
+    label = ui().is_term_visible() and 'Hide shell' or 'Show shell',
+    desc = 'Toggle interactive shell above the task list (project cwd).',
+  })
+
   return actions
 end
 
@@ -437,7 +443,13 @@ function M.do_action(action, task, index)
     M.restart(task.name)
   elseif action == 'kill' then
     M.kill(task.name)
+  elseif action == 'shell' then
+    ui().toggle_terminal({ focus = true })
   end
+end
+
+function M.toggle_terminal(opts)
+  ui().toggle_terminal(opts)
 end
 
 --- @param name? string

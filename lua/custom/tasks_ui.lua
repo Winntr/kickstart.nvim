@@ -10,24 +10,31 @@ local Menu = require 'nui.menu'
 
 local NS = vim.api.nvim_create_namespace 'task_ui'
 local PANEL_HEIGHT = 18
+local TERM_HEIGHT = 8
 local LIST_HEIGHT = 6
 
 ---@class TaskUiState
 ---@field layout NuiLayout?
+---@field term_split NuiSplit?
 ---@field list_split NuiSplit?
 ---@field out_split NuiSplit?
 ---@field tree NuiTree?
 ---@field out_buf integer?
+---@field term_buf integer?
+---@field term_visible boolean
 ---@field prev_win integer?
 ---@field selected string?
 ---@field tick uv.uv_timer_t?
 
 local state = {
   layout = nil,
+  term_split = nil,
   list_split = nil,
   out_split = nil,
   tree = nil,
   out_buf = nil,
+  term_buf = nil,
+  term_visible = false,
   prev_win = nil,
   selected = nil,
   tick = nil,
@@ -84,6 +91,158 @@ function M.out_win()
     return winid
   end
   return nil
+end
+
+--- @return boolean
+function M.is_term_visible()
+  return state.term_visible and state.term_split ~= nil and valid_win(state.term_split.winid)
+end
+
+--- @return integer?
+function M.term_win()
+  local winid = state.term_split and state.term_split.winid
+  if valid_win(winid) then
+    return winid
+  end
+  return nil
+end
+
+local function panel_height()
+  return PANEL_HEIGHT + (state.term_visible and TERM_HEIGHT or 0)
+end
+
+local function layout_box()
+  local children = {}
+  if state.term_visible then
+    table.insert(children, Layout.Box(state.term_split, { size = TERM_HEIGHT }))
+  end
+  table.insert(children, Layout.Box(state.list_split, { size = LIST_HEIGHT }))
+  table.insert(children, Layout.Box(state.out_split, { grow = 1 }))
+  return Layout.Box(children, { dir = 'col' })
+end
+
+local function relayout()
+  if not state.layout or not state.layout._.mounted then
+    return
+  end
+  state.layout:update({ size = panel_height() }, layout_box())
+end
+
+local function attach_shell_maps(buf)
+  if vim.b[buf].task_shell_mapped then
+    return
+  end
+  vim.b[buf].task_shell_mapped = true
+  vim.keymap.set('n', 'T', function()
+    M.toggle_terminal()
+  end, { buffer = buf, desc = 'Toggle shell above panel', nowait = true })
+  vim.keymap.set('t', 'T', function()
+    vim.cmd.stopinsert()
+    M.toggle_terminal()
+  end, { buffer = buf, desc = 'Toggle shell above panel' })
+  vim.keymap.set('n', 'q', function()
+    M.close()
+  end, { buffer = buf, desc = 'Close task panel', nowait = true })
+  vim.keymap.set('t', '<Esc><Esc>', function()
+    vim.cmd.stopinsert()
+    M.close()
+  end, { buffer = buf, desc = 'Close task panel' })
+end
+
+local function spawn_shell_buf(winid)
+  local buf = vim.api.nvim_create_buf(false, true)
+  vim.bo[buf].bufhidden = 'hide'
+  vim.bo[buf].filetype = 'task_shell'
+  vim.b[buf].task_panel_shell = true
+  vim.api.nvim_win_set_buf(winid, buf)
+  local ok, err = pcall(function()
+    vim.api.nvim_buf_call(buf, function()
+      vim.fn.termopen(vim.o.shell, { cwd = tasks().workspace_root() })
+    end)
+  end)
+  if not ok then
+    msg().echo_error('tasks: shell failed: ' .. tostring(err))
+    pcall(vim.api.nvim_buf_delete, buf, { force = true })
+    return nil
+  end
+  attach_shell_maps(buf)
+  state.term_buf = buf
+  return buf
+end
+
+function M.hide_terminal()
+  if not state.term_visible then
+    return
+  end
+  if state.term_split then
+    state.term_split:hide()
+  end
+  state.term_visible = false
+  relayout()
+end
+
+--- @param opts? { focus?: boolean, insert?: boolean }
+function M.show_terminal(opts)
+  opts = opts or {}
+  if not M.is_mounted() then
+    M.open({ focus = false })
+  end
+  if state.term_visible then
+    if opts.focus then
+      M.focus_terminal({ insert = opts.insert })
+    end
+    return
+  end
+  state.term_visible = true
+  relayout()
+  state.term_split:show()
+  local winid = M.term_win()
+  if not winid then
+    msg().echo_error 'tasks: shell window missing'
+    state.term_visible = false
+    return
+  end
+  if not state.term_buf or not vim.api.nvim_buf_is_valid(state.term_buf) then
+    if not spawn_shell_buf(winid) then
+      M.hide_terminal()
+      return
+    end
+  else
+    vim.api.nvim_win_set_buf(winid, state.term_buf)
+    attach_shell_maps(state.term_buf)
+  end
+  if opts.focus then
+    vim.api.nvim_set_current_win(winid)
+    if opts.insert ~= false and vim.bo[state.term_buf].buftype == 'terminal' then
+      vim.cmd.startinsert()
+    end
+  end
+end
+
+--- @param opts? { focus?: boolean, insert?: boolean }
+function M.toggle_terminal(opts)
+  opts = opts or {}
+  if M.is_term_visible() then
+    M.hide_terminal()
+    return
+  end
+  M.show_terminal(opts)
+end
+
+--- @param opts? { focus?: boolean, insert?: boolean }
+function M.focus_terminal(opts)
+  opts = opts or {}
+  if not M.is_term_visible() then
+    M.show_terminal({ focus = opts.focus ~= false, insert = opts.insert })
+    return
+  end
+  local winid = M.term_win()
+  if winid then
+    vim.api.nvim_set_current_win(winid)
+    if opts.insert and vim.bo[vim.api.nvim_get_current_buf()].buftype == 'terminal' then
+      vim.cmd.startinsert()
+    end
+  end
 end
 
 local function placeholder_lines()
@@ -325,6 +484,10 @@ local function setup_list_maps()
     end)
   end, 'Interact')
 
+  map('T', function()
+    M.toggle_terminal({ focus = true })
+  end, 'Toggle shell')
+
   map('<CR>', function()
     run_action(function(task, index)
       M.open_action_menu(task, index)
@@ -490,11 +653,26 @@ end
 
 local function create_layout()
   state.tree = nil
+  state.term_split = Split({
+    enter = false,
+    focusable = true,
+    border = vim.tbl_extend('force', {}, border, {
+      text = { top = ' Shell ', bottom = ' T toggle · q close panel ' },
+    }),
+    win_options = {
+      winhighlight = 'Normal:NormalFloat,FloatBorder:FloatBorder',
+      number = false,
+      relativenumber = false,
+      signcolumn = 'no',
+      wrap = false,
+    },
+  })
+
   state.list_split = Split({
     enter = false,
     focusable = true,
     border = vim.tbl_extend('force', {}, border, {
-      text = { top = ' Tasks ', bottom = ' <CR> actions · r run · s stop · x kill · R restart · a add · q close ' },
+      text = { top = ' Tasks ', bottom = ' T shell · <CR> actions · r run · s stop · x kill · R restart · a add · q close ' },
     }),
     win_options = {
       winhighlight = 'Normal:NormalFloat,FloatBorder:FloatBorder,WinBar:WinBar',
@@ -524,11 +702,8 @@ local function create_layout()
   state.layout = Layout({
     relative = 'editor',
     position = 'bottom',
-    size = PANEL_HEIGHT,
-  }, Layout.Box({
-    Layout.Box(state.list_split, { size = LIST_HEIGHT }),
-    Layout.Box(state.out_split, { grow = 1 }),
-  }, { dir = 'col' }))
+    size = panel_height(),
+  }, layout_box())
 end
 
 --- @param opts? { focus?: boolean }
@@ -566,6 +741,7 @@ end
 
 function M.close()
   stop_tick()
+  M.hide_terminal()
   if state.layout and state.layout._.mounted then
     state.layout:hide()
   end

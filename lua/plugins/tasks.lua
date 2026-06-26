@@ -73,6 +73,13 @@ return {
         end,
         desc = 'Add task',
       },
+      {
+        '<leader>tT',
+        function()
+          require('custom.tasks_ui').toggle_terminal({ focus = true })
+        end,
+        desc = 'Toggle shell above task panel',
+      },
     },
     config = function()
       local tasks = require 'custom.tasks'
@@ -153,6 +160,10 @@ return {
       vim.api.nvim_create_user_command('TaskAdd', function()
         tasks_ui.prompt_add()
       end, { desc = 'Add a workspace task' })
+
+      vim.api.nvim_create_user_command('TaskTerminal', function()
+        tasks_ui.toggle_terminal({ focus = true })
+      end, { desc = 'Toggle shell above task panel' })
     end,
   },
 }
