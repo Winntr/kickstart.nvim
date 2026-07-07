@@ -18,6 +18,10 @@ local PARSERS = {
   'http',
   'json',
   'sql',
+  'go',
+  'gomod',
+  'gosum',
+  'gowork',
 }
 
 local function install_missing_parsers()
@@ -36,13 +40,32 @@ local function install_missing_parsers()
   end
 end
 
+local GO_LANG = {
+  gomod = 'gomod',
+  gosum = 'gosum',
+  gowork = 'gowork',
+}
+
+local LEGACY_SYNTAX_FT = { gomod = true, gosum = true, gowork = true }
+
 local function setup_highlight_and_indent()
   vim.api.nvim_create_autocmd('FileType', {
-    callback = function()
-      pcall(vim.treesitter.start)
+    callback = function(ev)
+      local ft = vim.bo[ev.buf].filetype
+      if ft == '' then
+        return
+      end
+      local lang = GO_LANG[ft] or ft
+      local ok = pcall(vim.treesitter.start, ev.buf, lang)
+      if not ok then
+        return
+      end
       pcall(function()
-        vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        vim.bo[ev.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
       end)
+      if LEGACY_SYNTAX_FT[ft] then
+        vim.bo[ev.buf].syntax = 'on'
+      end
     end,
   })
 end

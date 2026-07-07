@@ -57,6 +57,22 @@ return {
       scroll = { enabled = false },
       statuscolumn = { enabled = true },
       words = { enabled = true },
+      image = {
+        enabled = true,
+        doc = {
+          enabled = true,
+          inline = true,
+          float = true,
+          max_width = 80,
+          max_height = 40,
+          conceal = function(_, img_type)
+            return img_type == 'math' or img_type == 'chart'
+          end,
+        },
+        convert = {
+          notify = true,
+        },
+      },
       terminal = {
         win = { style = 'terminal', position = 'bottom' },
       },

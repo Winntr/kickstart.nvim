@@ -43,17 +43,12 @@ return {
       sources = {
         default = { 'lsp', 'path', 'snippets', 'buffer', 'emoji' },
         per_filetype = {
-          sql = { 'lsp', 'dadbod', 'path', 'snippets', 'buffer', 'emoji' },
-          mysql = { 'lsp', 'dadbod', 'path', 'snippets', 'buffer', 'emoji' },
-          plsql = { 'lsp', 'dadbod', 'path', 'snippets', 'buffer', 'emoji' },
-          pgsql = { 'lsp', 'dadbod', 'path', 'snippets', 'buffer', 'emoji' },
+          sql = { 'lsp', 'path', 'snippets', 'buffer', 'emoji' },
+          mysql = { 'lsp', 'path', 'snippets', 'buffer', 'emoji' },
+          plsql = { 'lsp', 'path', 'snippets', 'buffer', 'emoji' },
+          pgsql = { 'lsp', 'path', 'snippets', 'buffer', 'emoji' },
         },
         providers = {
-          dadbod = {
-            name = 'Dadbod',
-            module = 'vim_dadbod_completion.blink',
-            score_offset = 3,
-          },
           avante_commands = {
             name = 'avante_commands',
             module = 'blink.compat.source',

@@ -5,6 +5,7 @@ return {
     config = function()
       local esc = require 'custom.cursor_terminal_esc'
       local chat = require 'custom.cursor_chat'
+      local done = require 'custom.cursor_done'
       -- ponytail: Windows `cursor` is the editor binary; `agent` is the CLI on PATH.
       local command = vim.fn.has 'win32' == 1 and 'agent' or 'cursor agent'
       local merged_config = {
@@ -22,10 +23,17 @@ return {
         term_opts = {
           on_open = function()
             esc.patch()
+            vim.schedule(function()
+              local state = require('neovim-cursor').terminal.get_state()
+              if state.buf then
+                done.watch_buf(state.buf)
+              end
+            end)
           end,
         },
       }
 
+      done.setup()
       require('neovim-cursor').setup(merged_config)
       chat.setup(merged_config)
 
@@ -48,6 +56,7 @@ return {
           if esc.is_cursor_agent_buf(args.buf) then
             vim.schedule(function()
               esc.patch(args.buf)
+              done.watch_buf(args.buf)
             end)
           end
         end,

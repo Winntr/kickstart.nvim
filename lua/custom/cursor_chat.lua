@@ -100,6 +100,10 @@ function M.send_refs(refs)
   vim.defer_fn(function()
     if terminal().is_running(id) then
       terminal().send_text(text, id)
+      local state = terminal().get_state(id)
+      if state.buf then
+        pcall(require('custom.cursor_done').arm, state.buf)
+      end
     end
   end, SEND_DELAY_MS)
 end

@@ -1,12 +1,16 @@
 ## [Unreleased]
 
+### Removed
+- Dadbod / DBUI SQL workflow (`vim-dadbod`, `vim-dadbod-ui`, `vim-dadbod-completion`, `lua/plugins/sql.lua`, `custom.db_url`, `<leader>D` keymaps). Use DataGrip or another client to run queries; Neovim keeps `sqlls` + `sqlfluff` for editing.
+
 ### Fixed
+- Go treesitter highlighting: add `go`, `gomod`, `gosum`, `gowork` parsers to install list; FileType autocmd passes explicit `(buf, lang)` and enables legacy syntax for `go.mod` / `go.sum` / `go.work`.
 - Task add prompt crash: nui `Input` unmounts before `on_submit`; removed redundant `unmount()` and fixed callback closure over the input instance.
 - Task panel crash on open: nui tree nodes expose fields on the node directly (`node.id`), not `node.data`.
 - Task panel toggle after hide: nui clears split `winid` when hidden; `is_open()` now guards before `nvim_win_is_valid`.
 
 ### Added
-- Task panel optional shell split above the task list (`T` / `<leader>tT` / `:TaskTerminal`); uses project cwd, persists while panel is open.
+- Mermaid diagram support: `kevalin/mermaid.nvim` + `custom.mermaid_markdown` for ```mermaid fences in markdown; Snacks `image` inline charts when `mmdc`/`magick` available; `render-markdown` skips mermaid code blocks.
 - `moyiz/blink-emoji.nvim` emoji completion in insert mode (`:smile` → 😄) via blink.cmp.
 - `custom.tasks` + `custom.tasks_ui` Overseer-style workspace task panel: task list + live output pane, hidden PTY buffers, `<leader>tm` toggle, list keymaps (`r` run, `s` stop, `x` kill, `R` restart, `i` interact), `.nvim/tasks.lua` persistence; `:TaskUI`, `:TaskRun`, `:TaskShow`, `:TaskStop`, `:TaskKill`, `:TaskHide`, `:TaskAdd`.
 - `felixcuello/neovim-cursor` terminal integration for Cursor Agent (`cursor agent`) with `<leader>aa` toggle, `<leader>an` new session, `<leader>at` select, and `<leader>ar` rename.

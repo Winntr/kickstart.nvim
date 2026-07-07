@@ -158,6 +158,79 @@ and conflicts with double-Esc terminal normal mode. This config patches agent bu
 
 Reopen the agent (`<leader>aa`) after updating this config so existing buffers pick up the patch.
 
+### Done notifications (`custom.cursor_done`)
+
+Alerts when the interactive agent terminal goes quiet after a reply (idle heuristic; the `agent` process does not exit per message).
+
+| Signal | Behavior |
+|--------|----------|
+| Desktop toast | Windows balloon via PowerShell; `notify-send` on Linux if available; otherwise `vim.notify` |
+| Windows Terminal tab | OSC 2 title prefix `[!] ` (e.g. `[!] init.lua - nvim`) |
+| In-editor | Snacks/`vim.notify` with title **Neovim** |
+
+**When it fires:** output stops for **2 seconds** (`idle_ms`) and the agent split is **not** the current window (`only_when_unfocused`). Sending context via `<leader>as` / `<leader>ac` / `<leader>aB` arms the watcher; typing directly in the agent terminal arms after enough output lines.
+
+**Clear `[!]`:** focus the agent split (`<leader>af` or click the window).
+
+| Command | Action |
+|---------|--------|
+| `:CursorDoneToggle` | Enable/disable alerts |
+
+**Windows Terminal:** profile setting **Suppress title changes** must be **off**, or OSC title updates are ignored.
+
+**Customize** in `lua/plugins/ai/neovim_cursor.lua` after `done.setup()`:
+
+```lua
+done.setup({
+  idle_ms = 2500,
+  message = 'Cursor agent finished responding',
+  title_prefix = '[!] ',
+})
+```
+
+**False positives:** slow streaming with pauses longer than `idle_ms`, or switching away right after the agent opens (banner output). Increase `idle_ms` if needed.
+
+Implementation: `lua/custom/cursor_done.lua`.
+
+## Mermaid diagrams in markdown
+
+Cursor and other tools often emit ` ```mermaid ` fenced blocks. This config renders them three ways:
+
+| Method | When | Requirements |
+|--------|------|----------------|
+| **Browser preview** | `<leader>um` on a fence | None (built-in HTTP server + mermaid.js) |
+| **Terminal inline** | `<leader>uM` on a fence | `mmdc` + Kitty **or** `chafa` |
+| **Auto inline in buffer** | Open markdown | `mmdc` + ImageMagick `magick` + Kitty/WezTerm/Ghostty |
+
+`render-markdown.nvim` leaves `mermaid` fences alone (`code.disable`) so Snacks Image can detect them.
+
+### Keymaps (markdown / Avante buffers)
+
+| Key | Action |
+|-----|--------|
+| `<leader>um` | Live browser preview for ```mermaid block at cursor |
+| `<leader>uM` | Inline terminal render for block at cursor |
+
+Commands: `:MermaidBlockPreview`, `:MermaidBlockRender`, `:MermaidPreview`, `:MermaidPreviewStop`.
+
+### Windows Terminal note
+
+Snacks Image uses the **Kitty graphics protocol**. Windows Terminal does **not** support Kitty graphics (Sixel is separate). On WT, use **`<leader>um`** (browser preview) — no extra installs.
+
+For in-editor graphics, use **WezTerm** or **Ghostty**, or install **chafa** and use `<leader>uM`.
+
+### Optional tools (inline / auto render)
+
+```powershell
+npm install -g @mermaid-js/mermaid-cli
+winget install ImageMagick.ImageMagick
+scoop install chafa   # optional; ASCII/color inline in any terminal
+```
+
+Verify: `:checkhealth snacks` (image section), `mmdc --version`, `magick -version`.
+
+Implementation: `lua/plugins/mermaid.lua`, `lua/custom/mermaid_markdown.lua`, `lua/plugins/snacks.lua` (`image`), `lua/plugins/ui.lua` (`render-markdown`).
+
 ### Legacy: Avante Cursor ACP
 
 `avante.nvim` is disabled (`enabled = false` in `lua/plugins/ai/avante.lua`). Notes below are kept for reference if you re-enable ACP.
@@ -395,3 +468,28 @@ in `vim/treesitter.lua` via `nvim-treesitter/query_predicates.lua` and `render-m
 If errors persist after migration, run `:checkhealth render-markdown` and confirm markdown parsers are installed.
 
 This config also patches `render-markdown` to skip a render pass when treesitter parse fails on a streaming buffer (common while Avante is still writing output). That stops the error spam, but you still need the `main` branch install for full markdown rendering.
+
+## Go syntax highlighting
+
+Go highlighting was omitted from the nvim-treesitter `main` branch parser list during the Neovim 0.12 migration. This config installs `go`, `gomod`, `gosum`, and `gowork` parsers and starts treesitter with explicit `(buf, lang)` args.
+
+| Filetype | Parser | Notes |
+|----------|--------|-------|
+| `go` | `go` | Treesitter only |
+| `gomod` | `gomod` | Treesitter + `vim.bo.syntax = on` (partial query coverage) |
+| `gosum` | `gosum` | Treesitter + legacy syntax |
+| `gowork` | `gowork` | Treesitter + legacy syntax |
+
+### Fix steps
+
+1. Restart Neovim (auto-installs missing parsers on startup).
+2. Or run manually: `:TSInstall go gomod gosum gowork`
+3. Confirm: `:TSInstallInfo` lists all four as installed.
+4. Open a `.go` file and run `:Inspect` — should show treesitter captures (e.g. `@function`).
+
+### Parser install fails on Windows
+
+The `main` branch builds parsers via `tree-sitter-cli` and a C compiler:
+
+- `tree-sitter --version` must work on PATH.
+- If `:TSInstall go` fails with `cl.exe` errors, install [Build Tools for Visual Studio](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022) (Desktop development with C++).
