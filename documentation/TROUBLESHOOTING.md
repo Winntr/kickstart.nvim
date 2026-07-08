@@ -493,3 +493,27 @@ The `main` branch builds parsers via `tree-sitter-cli` and a C compiler:
 
 - `tree-sitter --version` must work on PATH.
 - If `:TSInstall go` fails with `cl.exe` errors, install [Build Tools for Visual Studio](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022) (Desktop development with C++).
+
+### Go LSP (gopls) / import completion
+
+Go completion (imports, symbols, Bubble Tea APIs) requires **gopls**, not treesitter alone.
+
+1. Ensure `go` is on PATH (`go version`).
+2. Run `:Mason` and confirm `gopls` is installed (or `:MasonInstall gopls`).
+3. Open a file inside a module root (`go.mod` or `go.work` parent directory).
+4. Run `:LspInfo` or `:checkhealth vim.lsp` in `main.go` — should show `gopls` attached.
+5. Run `go mod download` in the project if deps are missing from the module cache.
+
+If gopls attaches but imports still fail, run `:LspRestart` or `:lsp restart gopls` after `go mod tidy`.
+
+### LSP commands (Neovim 0.12)
+
+Neovim 0.12 removed the old `:LspInfo` / `:LspRestart` built-ins. This config restores them as aliases:
+
+| Command | Native equivalent |
+|---------|-------------------|
+| `:LspInfo` | `:checkhealth vim.lsp` |
+| `:LspRestart` | `:lsp restart` (optional server name) |
+| `:LspLog` | Opens `stdpath('state')/lsp.log` |
+
+You can also type `:lsp restart gopls` or `:checkhealth vim.lsp` directly.

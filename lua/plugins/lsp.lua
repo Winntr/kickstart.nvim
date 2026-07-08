@@ -194,6 +194,28 @@ return {
         filetypes = { 'sql', 'mysql', 'plsql', 'pgsql' },
       })
 
+      vim.lsp.config('gopls', {
+        filetypes = { 'go', 'gomod', 'gowork', 'gotmpl' },
+        root_markers = { 'go.work', 'go.mod', '.git' },
+        settings = {
+          gopls = {
+            gofumpt = true,
+            staticcheck = true,
+            analyses = {
+              unusedparams = true,
+            },
+            completionDocumentation = true,
+            usePlaceholders = true,
+            hints = {
+              assignVariableTypes = true,
+              compositeLiteralFields = true,
+              compositeLiteralTypes = true,
+              parameterNames = true,
+            },
+          },
+        },
+      })
+
       vim.lsp.config('angularls', {
         cmd = {
           'ngserver',
@@ -220,6 +242,7 @@ return {
         'vue_ls',
         'angularls',
         'sqlls',
+        'gopls',
       }
 
       for _, server in ipairs(servers) do
@@ -238,8 +261,27 @@ return {
           'lua-language-server',
           'sqlls',
           'sqlfluff',
+          'gopls',
         },
       }
+
+      -- Neovim 0.12+: native :lsp restart / :checkhealth vim.lsp (old :LspInfo/:LspRestart removed)
+      vim.api.nvim_create_user_command('LspInfo', function()
+        vim.cmd.checkhealth('vim.lsp')
+      end, { desc = 'Show attached LSP clients (checkhealth vim.lsp)' })
+
+      vim.api.nvim_create_user_command('LspRestart', function(opts)
+        local args = vim.trim(opts.args)
+        if args == '' then
+          vim.cmd.lsp('restart')
+        else
+          vim.cmd.lsp({ 'restart', args })
+        end
+      end, { nargs = '?', desc = 'Restart LSP (optional server name, e.g. gopls)' })
+
+      vim.api.nvim_create_user_command('LspLog', function()
+        vim.cmd.edit(vim.fn.stdpath 'state' .. '/lsp.log')
+      end, { desc = 'Open LSP log file' })
     end,
   },
 }

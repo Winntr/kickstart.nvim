@@ -4,6 +4,7 @@
 - Dadbod / DBUI SQL workflow (`vim-dadbod`, `vim-dadbod-ui`, `vim-dadbod-completion`, `lua/plugins/sql.lua`, `custom.db_url`, `<leader>D` keymaps). Use DataGrip or another client to run queries; Neovim keeps `sqlls` + `sqlfluff` for editing.
 
 ### Fixed
+- Go LSP: enable `gopls`; restore `:LspInfo` / `:LspRestart` / `:LspLog` aliases for Neovim 0.12 (`:checkhealth vim.lsp`, `:lsp restart`).
 - Go treesitter highlighting: add `go`, `gomod`, `gosum`, `gowork` parsers to install list; FileType autocmd passes explicit `(buf, lang)` and enables legacy syntax for `go.mod` / `go.sum` / `go.work`.
 - Task add prompt crash: nui `Input` unmounts before `on_submit`; removed redundant `unmount()` and fixed callback closure over the input instance.
 - Task panel crash on open: nui tree nodes expose fields on the node directly (`node.id`), not `node.data`.
