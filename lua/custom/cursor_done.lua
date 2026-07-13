@@ -20,7 +20,7 @@ local cfg = {
   enabled = true,
   notify = true,
   tab_title = true,
-  idle_ms = 2000,
+  idle_ms = 3500,
   only_when_unfocused = true,
   message = 'Cursor agent finished responding',
   title = 'Neovim',
@@ -30,12 +30,16 @@ local cfg = {
 ---@class CursorDoneWatch
 ---@field timer? vim.uv.uv_timer_t
 ---@field attach? integer
----@field watching boolean
----@field alerted boolean
----@field lines_at_attach integer
+---@field armed boolean expecting agent reply for this cycle
+---@field alerted boolean notification already sent or user acknowledged
+---@field pending boolean idle detected while user was watching; alert on WinLeave
+---@field baseline_lines integer line count at arm / acknowledge
 
 ---@type table<integer, CursorDoneWatch>
 local watches = {}
+
+---@type table<integer, boolean> terminal insert mode focused per agent buf
+local term_focused = {}
 
 local tab_saved_title = nil ---@type string|nil
 local tab_alert = false
@@ -52,17 +56,41 @@ end
 ---@param buf integer
 ---@return boolean
 local function is_agent_buf(buf)
-  return get_esc().is_cursor_agent_buf(buf)
-end
-
----@param buf? integer
----@return boolean
-local function is_agent_focused(buf)
-  buf = buf or vim.api.nvim_get_current_buf()
-  if not is_agent_buf(buf) then
+  if not vim.api.nvim_buf_is_valid(buf) then
     return false
   end
-  local win = vim.api.nvim_get_current_win()
+  if get_esc().is_cursor_agent_buf(buf) then
+    return true
+  end
+  if vim.bo[buf].buftype ~= 'terminal' then
+    return false
+  end
+  local chan = vim.bo[buf].channel
+  if chan and chan > 0 then
+    local ok, info = pcall(vim.fn.jobinfo, chan)
+    if ok and type(info) == 'table' then
+      local cmd = type(info.cmd) == 'table' and table.concat(info.cmd, ' ') or tostring(info.cmd or '')
+      if cmd:find('agent', 1, true) or cmd:find('cursor', 1, true) then
+        return true
+      end
+    end
+  end
+  return false
+end
+
+---@param buf integer
+---@return boolean
+local function is_agent_win_focused(buf)
+  if not vim.api.nvim_buf_is_valid(buf) then
+    return false
+  end
+  if term_focused[buf] then
+    return true
+  end
+  local win = vim.fn.bufwinid(buf)
+  if win <= 0 or win ~= vim.api.nvim_get_current_win() then
+    return false
+  end
   return vim.api.nvim_win_get_buf(win) == buf
 end
 
@@ -146,9 +174,10 @@ local function ensure_watch(buf)
     return w
   end
   w = {
-    watching = false,
+    armed = false,
     alerted = false,
-    lines_at_attach = vim.api.nvim_buf_line_count(buf),
+    pending = false,
+    baseline_lines = vim.api.nvim_buf_line_count(buf),
   }
   watches[buf] = w
   return w
@@ -165,29 +194,48 @@ local function stop_timer(buf)
 end
 
 ---@param buf integer
+local function notify_done(buf)
+  if cfg.notify then
+    if vim.fn.has 'win32' == 1 then
+      M.desktop_notify(cfg.title, cfg.message)
+    else
+      vim.notify(cfg.message, vim.log.levels.INFO, { title = cfg.title })
+    end
+  end
+  M.set_tab_alert()
+end
+
+---@param buf integer
+local function fire_alert(buf)
+  local w = watches[buf]
+  if not w or w.alerted or not w.armed then
+    return
+  end
+
+  w.armed = false
+  w.alerted = true
+  w.pending = false
+  stop_timer(buf)
+  notify_done(buf)
+end
+
+---@param buf integer
 local function on_idle(buf)
   if not cfg.enabled or not vim.api.nvim_buf_is_valid(buf) then
     return
   end
 
   local w = watches[buf]
-  if not w or not w.watching or w.alerted then
+  if not w or not w.armed or w.alerted then
     return
   end
 
-  if cfg.only_when_unfocused and is_agent_focused(buf) then
-    M.schedule_idle(buf)
+  if cfg.only_when_unfocused and is_agent_win_focused(buf) then
+    w.pending = true
     return
   end
 
-  w.watching = false
-  w.alerted = true
-
-  if cfg.notify then
-    M.desktop_notify(cfg.title, cfg.message)
-  end
-  vim.notify(cfg.message, vim.log.levels.INFO, { title = cfg.title })
-  M.set_tab_alert()
+  fire_alert(buf)
 end
 
 ---@param buf integer
@@ -197,6 +245,10 @@ function M.schedule_idle(buf)
   end
 
   local w = ensure_watch(buf)
+  if not w.armed or w.alerted then
+    return
+  end
+
   stop_timer(buf)
 
   if not w.timer then
@@ -217,11 +269,21 @@ local function on_lines(buf)
   local w = ensure_watch(buf)
   local lines = vim.api.nvim_buf_line_count(buf)
 
-  if not w.watching and lines > w.lines_at_attach + 2 then
-    w.watching = true
+  if w.alerted and term_focused[buf] and lines > w.baseline_lines then
+    w.alerted = false
+    w.armed = true
   end
 
-  if w.watching and not w.alerted then
+  if w.alerted then
+    return
+  end
+
+  if not w.armed and lines > w.baseline_lines + 2 then
+    w.armed = true
+  end
+
+  if w.armed then
+    w.pending = false
     M.schedule_idle(buf)
   end
 end
@@ -247,6 +309,7 @@ function M.watch_buf(buf)
       w.attach = nil
       stop_timer(buf)
       watches[buf] = nil
+      term_focused[buf] = nil
     end,
   })
 end
@@ -269,19 +332,28 @@ function M.arm(buf)
 
   M.watch_buf(buf)
   local w = ensure_watch(buf)
-  w.watching = true
+  w.armed = true
   w.alerted = false
+  w.pending = false
+  w.baseline_lines = vim.api.nvim_buf_line_count(buf)
   M.schedule_idle(buf)
 end
 
---- Clear `[!]` tab prefix and allow the next idle alert.
+--- Clear alerts and suppress re-notify until the next arm() or new output cycle.
 ---@param buf? integer
 function M.acknowledge(buf)
   buf = buf or vim.api.nvim_get_current_buf()
+  if not is_agent_buf(buf) then
+    M.clear_tab_alert()
+    return
+  end
+
   local w = watches[buf]
   if w then
-    w.alerted = false
-    w.watching = false
+    w.alerted = true
+    w.armed = false
+    w.pending = false
+    w.baseline_lines = vim.api.nvim_buf_line_count(buf)
     stop_timer(buf)
   end
   M.clear_tab_alert()
@@ -321,14 +393,55 @@ vim.api.nvim_create_autocmd('WinEnter', {
   end,
 })
 
+vim.api.nvim_create_autocmd('WinLeave', {
+  callback = function(args)
+    if not is_agent_buf(args.buf) then
+      return
+    end
+    local w = watches[args.buf]
+    if w and w.pending and w.armed and not w.alerted then
+      fire_alert(args.buf)
+    end
+  end,
+})
+
+vim.api.nvim_create_autocmd('TermEnter', {
+  callback = function(args)
+    if not is_agent_buf(args.buf) then
+      return
+    end
+    term_focused[args.buf] = true
+    stop_timer(args.buf)
+    local w = watches[args.buf]
+    if w then
+      w.pending = false
+    end
+  end,
+})
+
+vim.api.nvim_create_autocmd('TermLeave', {
+  callback = function(args)
+    if not is_agent_buf(args.buf) then
+      return
+    end
+    term_focused[args.buf] = false
+    local w = watches[args.buf]
+    if w and w.pending and w.armed and not w.alerted then
+      fire_alert(args.buf)
+    end
+  end,
+})
+
 vim.api.nvim_create_user_command('CursorDoneToggle', function()
   M.toggle()
 end, { desc = 'Toggle Cursor agent done notifications' })
 
--- ponytail: self-check — idle scheduling arms after output growth
+-- ponytail: self-check — acknowledge suppresses until next arm
 do
-  local w = { watching = false, alerted = false, lines_at_attach = 1 }
-  assert(w.lines_at_attach + 2 == 3)
+  local w = { armed = true, alerted = false, pending = false, baseline_lines = 1 }
+  w.alerted = true
+  w.armed = false
+  assert(w.alerted and not w.armed)
 end
 
 return M

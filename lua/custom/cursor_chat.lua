@@ -158,6 +158,9 @@ function M.focus_agent()
 
   vim.schedule(function()
     local state = terminal().get_state(id)
+    if state.buf then
+      pcall(require('custom.cursor_done').acknowledge, state.buf)
+    end
     if state.is_visible and state.win and vim.api.nvim_win_is_valid(state.win) then
       vim.api.nvim_set_current_win(state.win)
       vim.cmd 'startinsert'

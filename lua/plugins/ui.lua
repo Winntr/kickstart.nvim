@@ -64,23 +64,79 @@ return {
   {
     'nvim-lualine/lualine.nvim',
     event = 'VeryLazy',
-    opts = {
-      options = {
-        section_separators = '',
-        component_separators = '│',
-        globalstatus = true,
-        theme = 'auto',
-      },
-      sections = {
-        lualine_a = { 'mode' },
-        lualine_b = { 'branch', 'diff', 'diagnostics' },
-        lualine_c = { 'filename' },
-        lualine_x = { 'filetype' },
-        lualine_y = { 'progress' },
-        lualine_z = { 'location' },
-      },
-      extensions = { 'quickfix', 'lazy' },
-    },
+    config = function()
+      local function short_path()
+        local filename = vim.fn.expand '%:t'
+        if filename == '' then
+          return '[' .. vim.fn.fnamemodify(vim.fn.getcwd(), ':t') .. ']'
+        end
+        local parent = vim.fn.expand '%:p:h:t'
+        if parent == '' or parent == filename then
+          return filename
+        end
+        return parent .. '/' .. filename
+      end
+
+      local function truncated_path()
+        local path = vim.fn.expand '%:p:~'
+        if path == '' then
+          return vim.fn.fnamemodify(vim.fn.getcwd(), ':~')
+        end
+
+        local max_len = math.floor(vim.o.columns * 0.3)
+        if #path <= max_len then
+          return path
+        end
+
+        local sep = vim.fn.has 'win32' == 1 and '\\' or '/'
+        local parts = vim.split(path, '[/\\]')
+        if #parts <= 2 then
+          return '…' .. path:sub(-(max_len - 1))
+        end
+
+        local first = parts[1]
+        local remaining = max_len - #first - 4
+        local tail = ''
+        for i = #parts, 2, -1 do
+          local part = parts[i]
+          if #tail + #part + 1 > remaining then
+            break
+          end
+          tail = sep .. part .. tail
+        end
+
+        if tail ~= '' then
+          return first .. sep .. '…' .. tail
+        end
+        return '…' .. sep .. parts[#parts]
+      end
+
+      require('lualine').setup {
+        options = {
+          section_separators = '',
+          component_separators = '│',
+          globalstatus = true,
+          theme = 'auto',
+        },
+        sections = {
+          lualine_a = { 'mode' },
+          lualine_b = { 'branch', 'diff', 'diagnostics' },
+          lualine_c = { short_path, truncated_path },
+          lualine_x = { 'filetype' },
+          lualine_y = { 'progress' },
+          lualine_z = { 'location' },
+        },
+        inactive_sections = {
+          lualine_a = {},
+          lualine_b = {},
+          lualine_c = { 'filename' },
+          lualine_x = { 'location' },
+          lualine_y = {},
+          lualine_z = {},
+        },
+        extensions = { 'quickfix', 'lazy' },
+      }
+    end,
   },
 
   {
@@ -143,11 +199,16 @@ return {
         optional = true,
       },
     },
-    config = function()
-      vim.keymap.set('n', '<leader>ls', function()
-        require('dropbar.api').pick()
-      end, { desc = 'Symbol breadcrumbs' })
-    end,
+    opts = {},
+    keys = {
+      {
+        '<leader>ls',
+        function()
+          require('dropbar.api').pick()
+        end,
+        desc = 'Symbol breadcrumbs',
+      },
+    },
   },
 
   {

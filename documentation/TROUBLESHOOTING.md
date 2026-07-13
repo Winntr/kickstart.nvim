@@ -168,9 +168,11 @@ Alerts when the interactive agent terminal goes quiet after a reply (idle heuris
 | Windows Terminal tab | OSC 2 title prefix `[!] ` (e.g. `[!] init.lua - nvim`) |
 | In-editor | Snacks/`vim.notify` with title **Neovim** |
 
-**When it fires:** output stops for **2 seconds** (`idle_ms`) and the agent split is **not** the current window (`only_when_unfocused`). Sending context via `<leader>as` / `<leader>ac` / `<leader>aB` arms the watcher; typing directly in the agent terminal arms after enough output lines.
+**When it fires:** output stops for **3.5 seconds** (`idle_ms`) while you are **not** focused on the agent split (normal or terminal mode). Sending context via `<leader>as` / `<leader>ac` / `<leader>aB` arms the watcher; typing directly in the agent arms after enough new output lines.
 
-**Clear `[!]`:** focus the agent split (`<leader>af` or click the window).
+**Clear `[!]` / stop repeat alerts:** focus the agent split (`<leader>af`, click the window, or `TermEnter`). That acknowledges the alert and suppresses repeats until the next send or `:lua require('custom.cursor_done').arm()`.
+
+If you were watching the agent when it finished, the alert is deferred until you leave the split (`WinLeave` / `TermLeave`).
 
 | Command | Action |
 |---------|--------|
@@ -182,13 +184,15 @@ Alerts when the interactive agent terminal goes quiet after a reply (idle heuris
 
 ```lua
 done.setup({
-  idle_ms = 2500,
+  idle_ms = 4000,
   message = 'Cursor agent finished responding',
   title_prefix = '[!] ',
 })
 ```
 
-**False positives:** slow streaming with pauses longer than `idle_ms`, or switching away right after the agent opens (banner output). Increase `idle_ms` if needed.
+**False positives:** slow streaming with pauses longer than `idle_ms`. Increase `idle_ms` if needed.
+
+**Missed alerts:** ensure the agent buffer is detected (`:lua print(require('custom.cursor_done').watch_buf(vim.fn.bufnr()))` after focusing agent). Multiple agent tabs each need `watch_buf`; context sends arm only the active tab.
 
 Implementation: `lua/custom/cursor_done.lua`.
 

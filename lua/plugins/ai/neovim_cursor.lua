@@ -24,9 +24,12 @@ return {
           on_open = function()
             esc.patch()
             vim.schedule(function()
-              local state = require('neovim-cursor').terminal.get_state()
-              if state.buf then
-                done.watch_buf(state.buf)
+              local tabs = require('neovim-cursor').tabs
+              for _, term in ipairs(tabs.list_terminals()) do
+                local state = require('neovim-cursor').terminal.get_state(term.id)
+                if state.buf then
+                  done.watch_buf(state.buf)
+                end
               end
             end)
           end,
