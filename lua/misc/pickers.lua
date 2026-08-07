@@ -60,4 +60,14 @@ function M.resume(opts)
   return builtin('resume', opts)
 end
 
+function M.symbols(opts)
+  if vim.fn.has 'nvim-0.12' == 1 then
+    require('custom.msgarea').reset()
+  end
+
+  return require('mini.extra').pickers.lsp(
+    vim.tbl_extend('force', { scope = 'workspace_symbol_live' }, opts or {})
+  )
+end
+
 return M

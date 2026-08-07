@@ -43,6 +43,10 @@ map('n', '<leader>fr', function()
   pickers().resume()
 end, { desc = 'Resume picker' })
 
+map('n', '<leader>fs', function()
+  pickers().symbols()
+end, { desc = 'Search symbols' })
+
 map('n', '<leader>e', '<cmd>Oil<cr>', { desc = 'Edit filesystem' })
 map('n', '-', '<cmd>Oil<cr>', { desc = 'Oil' })
 
@@ -55,7 +59,7 @@ map('n', '<leader>sr', function()
   require('grug-far').open()
 end, { desc = 'Search and replace' })
 
-map('n', '<leader>ao', '<cmd>AerialToggle!<cr>', { desc = 'Symbol outline' })
+map('n', '<leader>fo', '<cmd>AerialToggle!<cr>', { desc = 'Symbol outline' })
 
 map('n', '<leader>vl', '<cmd>Lazy<cr>', { desc = 'Lazy' })
 map('n', '<leader>vm', '<cmd>Mason<cr>', { desc = 'Mason' })

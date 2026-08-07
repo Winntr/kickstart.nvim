@@ -447,6 +447,7 @@ Clicking back into the editor collapses msgarea without destroying it. Use `<lea
 `lua/custom/msgarea.lua` centralizes close/reset helpers. Local flows that reclaim the msgarea region call `reset()` before opening:
 
 - `mini.pick` pickers (`<leader>ff`, `<leader>fg`, etc.)
+- `mini.extra` LSP symbol search (`<leader>fs`) and Aerial symbol outline (`<leader>fo`)
 - `wtf.nvim` diagnose/fix via `custom.wtf_cursor` (`<leader>awd`, `<leader>awf`)
 
 Lightweight `wtf` status output (start, success, warnings, errors) is routed through msgarea via ui2 message targets. Multi-line diagnose responses still open in the `wtf` popup.

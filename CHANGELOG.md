@@ -13,6 +13,8 @@
 - Task panel toggle after hide: nui clears split `winid` when hidden; `is_open()` now guards before `nvim_win_is_valid`.
 
 ### Added
+- `<leader>fs` workspace symbol search via `mini.extra` LSP picker (`workspace_symbol_live`).
+- `<leader>fo` symbol outline (Aerial); moved off `<leader>ao` so `<leader>a` stays AI-only.
 - Mermaid diagram support: `kevalin/mermaid.nvim` + `custom.mermaid_markdown` for ```mermaid fences in markdown; Snacks `image` inline charts when `mmdc`/`magick` available; `render-markdown` skips mermaid code blocks.
 - `moyiz/blink-emoji.nvim` emoji completion in insert mode (`:smile` → 😄) via blink.cmp.
 - `custom.tasks` + `custom.tasks_ui` Overseer-style workspace task panel: task list + live output pane, hidden PTY buffers, `<leader>tm` toggle, list keymaps (`r` run, `s` stop, `x` kill, `R` restart, `i` interact), `.nvim/tasks.lua` persistence; `:TaskUI`, `:TaskRun`, `:TaskShow`, `:TaskStop`, `:TaskKill`, `:TaskHide`, `:TaskAdd`.
