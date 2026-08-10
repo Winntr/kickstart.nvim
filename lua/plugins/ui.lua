@@ -202,7 +202,7 @@ return {
     opts = {},
     keys = {
       {
-        '<leader>ls',
+        '<leader>fl',
         function()
           require('dropbar.api').pick()
         end,

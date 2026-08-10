@@ -16,6 +16,12 @@ local function pick_window()
   }
 end
 
+local function reset_msgarea()
+  if vim.fn.has 'nvim-0.12' == 1 then
+    require('custom.msgarea').reset()
+  end
+end
+
 function M.setup()
   require('mini.pick').setup {
     window = { config = pick_window() },
@@ -23,9 +29,7 @@ function M.setup()
 end
 
 local function builtin(name, opts)
-  if vim.fn.has 'nvim-0.12' == 1 then
-    require('custom.msgarea').reset()
-  end
+  reset_msgarea()
 
   local pick = require 'mini.pick'
   local fn = pick.builtin[name]
@@ -34,6 +38,16 @@ local function builtin(name, opts)
     return
   end
   return fn(opts)
+end
+
+local function extra_picker(fn, opts)
+  reset_msgarea()
+  return require('mini.extra').pickers[fn](opts or {})
+end
+
+local function extra_lsp(scope, opts)
+  reset_msgarea()
+  return require('mini.extra').pickers.lsp(vim.tbl_extend('force', { scope = scope }, opts or {}))
 end
 
 function M.files(opts)
@@ -60,14 +74,41 @@ function M.resume(opts)
   return builtin('resume', opts)
 end
 
-function M.symbols(opts)
-  if vim.fn.has 'nvim-0.12' == 1 then
-    require('custom.msgarea').reset()
-  end
+function M.oldfiles(opts)
+  return extra_picker('oldfiles', opts)
+end
 
-  return require('mini.extra').pickers.lsp(
-    vim.tbl_extend('force', { scope = 'workspace_symbol_live' }, opts or {})
-  )
+function M.document_symbols(opts)
+  return extra_lsp('document_symbol', opts)
+end
+
+function M.diagnostics(opts)
+  return extra_picker('diagnostic', opts)
+end
+
+function M.git_hunks(opts)
+  return extra_picker('git_hunks', opts)
+end
+
+function M.keymaps(opts)
+  return extra_picker('keymaps', opts)
+end
+
+function M.lsp(scope, opts)
+  return extra_lsp(scope, opts)
+end
+
+function M.symbols(opts)
+  return extra_lsp('workspace_symbol_live', opts)
+end
+
+function M.grep_word(opts)
+  local word = vim.fn.expand '<cword>'
+  if word == '' then
+    require('custom.msgarea').echo_warn 'No word under cursor'
+    return
+  end
+  return builtin('grep', vim.tbl_extend('force', { pattern = word }, opts or {}))
 end
 
 return M

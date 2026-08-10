@@ -29,6 +29,14 @@ return {
   },
 
   {
+    'mbbill/undotree',
+    cmd = 'UndotreeToggle',
+    keys = {
+      { '<leader>vu', '<cmd>UndotreeToggle<cr>', desc = 'Undotree' },
+    },
+  },
+
+  {
     'folke/flash.nvim',
     event = 'VeryLazy',
     opts = { modes = { search = { enabled = false } } },

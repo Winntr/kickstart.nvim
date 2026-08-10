@@ -19,6 +19,8 @@ if not vim.uv.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+require('custom.usage').patch_keymap()
+
 require('lazy').setup({
   { import = 'plugins' },
   { import = 'plugins.ai' },
@@ -48,3 +50,4 @@ require('lazy').setup({
 })
 
 require 'config.keymap'
+require('custom.usage').setup()

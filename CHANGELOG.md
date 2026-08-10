@@ -13,6 +13,8 @@
 - Task panel toggle after hide: nui clears split `winid` when hidden; `is_open()` now guards before `nvim_win_is_valid`.
 
 ### Added
+- Expanded find/search/code keymaps via `mini.extra` pickers: `<leader>f.` recent files, `<leader>fd` document symbols, `<leader>fk` keymap search, `<leader>fl` symbol breadcrumbs (moved from `<leader>ls`), `<leader>sd` diagnostics, `<leader>sw` grep word, `<leader>xt` TODOs, `<leader>gh` git hunks, `<leader>cr/ci/ct` LSP pickers, `<leader>cl` cursor line, `<leader>y` yank path, `<leader>qq` loclist toggle, `]q`/`[q` quickfix nav, `<leader>vu` undotree, `<leader>vr` usage report.
+- `custom.usage` tracks keymap/plugin/command usage to `usage.json`; `:UsageReport` and `:UsageReset`.
 - `<leader>fs` workspace symbol search via `mini.extra` LSP picker (`workspace_symbol_live`).
 - `<leader>fo` symbol outline (Aerial); moved off `<leader>ao` so `<leader>a` stays AI-only.
 - Mermaid diagram support: `kevalin/mermaid.nvim` + `custom.mermaid_markdown` for ```mermaid fences in markdown; Snacks `image` inline charts when `mmdc`/`magick` available; `render-markdown` skips mermaid code blocks.
