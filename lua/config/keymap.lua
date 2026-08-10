@@ -100,7 +100,7 @@ map('n', '<leader>y', function()
   require('custom.msgarea').echo_status('Yanked: ' .. path)
 end, { desc = 'Yank file path' })
 
-map('n', '<leader>qq', function()
+map('n', '<leader>ql', function()
   local winid = vim.fn.win_findbuf(vim.fn.bufnr '[Location List]')
   if winid and #winid > 0 then
     vim.cmd.lclose()
@@ -109,13 +109,14 @@ map('n', '<leader>qq', function()
   end
 end, { desc = 'Toggle location list' })
 
+map('n', '<leader>qd', vim.diagnostic.setloclist, { desc = 'Diagnostics to loclist' })
+
 map('n', ']q', '<cmd>cnext<cr>', { desc = 'Next quickfix item' })
 map('n', '[q', '<cmd>cprev<cr>', { desc = 'Previous quickfix item' })
 
 map('n', '<leader>e', '<cmd>Oil<cr>', { desc = 'Edit filesystem' })
 map('n', '-', '<cmd>Oil<cr>', { desc = 'Oil' })
 
-map('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Diagnostics to loclist' })
 map('n', '<leader>cf', function()
   require('conform').format { async = true, lsp_fallback = true }
 end, { desc = 'Format buffer' })

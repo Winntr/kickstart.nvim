@@ -448,7 +448,7 @@ Clicking back into the editor collapses msgarea without destroying it. Use `<lea
 
 - `mini.pick` pickers (`<leader>ff`, `<leader>fg`, etc.)
 - `mini.extra` pickers: `<leader>f.` recent files, `<leader>fd` document symbols, `<leader>fk` keymaps, `<leader>fl` breadcrumbs, `<leader>fs` workspace symbols, `<leader>fo` outline, `<leader>sd` diagnostics, `<leader>sw` grep word, `<leader>gh` git hunks, `<leader>cr/ci/ct` LSP pickers
-- Quickfix/loclist: `<leader>qq` toggle loclist, `]q`/`[q` next/prev quickfix item
+- Quickfix/loclist: `<leader>ql` toggle loclist, `<leader>qd` diagnostics to loclist, `]q`/`[q` next/prev quickfix item
 - Utilities: `<leader>y` yank file path, `<leader>cl` toggle cursor line, `<leader>xt` project TODOs, `<leader>vu` undotree, `<leader>vr` / `:UsageReport` usage stats
 - `wtf.nvim` diagnose/fix via `custom.wtf_cursor` (`<leader>awd`, `<leader>awf`)
 

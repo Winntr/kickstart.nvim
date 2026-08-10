@@ -4,6 +4,7 @@
 - Dadbod / DBUI SQL workflow (`vim-dadbod`, `vim-dadbod-ui`, `vim-dadbod-completion`, `lua/plugins/sql.lua`, `custom.db_url`, `<leader>D` keymaps). Use DataGrip or another client to run queries; Neovim keeps `sqlls` + `sqlfluff` for editing.
 
 ### Fixed
+- Harpoon menu now opens via `mini.pick` (`<leader>hh`); added `<leader>hs1-4` to assign slots, `<leader>hp`/`hn` prev/next, and feedback when jumping to empty slots.
 - Restored filepath breadcrumbs: lualine `short_path` / `truncated_path` in the statusline and dropbar winbar via explicit `opts = {}` so lazy.nvim calls `setup()` on load.
 - Cursor done notifications: acknowledge now suppresses repeat alerts; defer while agent split focused; alert on WinLeave/TermLeave; detect all agent tabs; single Windows toast (no duplicate vim.notify).
 - Go LSP: enable `gopls`; restore `:LspInfo` / `:LspRestart` / `:LspLog` aliases for Neovim 0.12 (`:checkhealth vim.lsp`, `:lsp restart`).
@@ -13,7 +14,7 @@
 - Task panel toggle after hide: nui clears split `winid` when hidden; `is_open()` now guards before `nvim_win_is_valid`.
 
 ### Added
-- Expanded find/search/code keymaps via `mini.extra` pickers: `<leader>f.` recent files, `<leader>fd` document symbols, `<leader>fk` keymap search, `<leader>fl` symbol breadcrumbs (moved from `<leader>ls`), `<leader>sd` diagnostics, `<leader>sw` grep word, `<leader>xt` TODOs, `<leader>gh` git hunks, `<leader>cr/ci/ct` LSP pickers, `<leader>cl` cursor line, `<leader>y` yank path, `<leader>qq` loclist toggle, `]q`/`[q` quickfix nav, `<leader>vu` undotree, `<leader>vr` usage report.
+- Expanded find/search/code keymaps via `mini.extra` pickers: `<leader>f.` recent files, `<leader>fd` document symbols, `<leader>fk` keymap search, `<leader>fl` symbol breadcrumbs (moved from `<leader>ls`), `<leader>sd` diagnostics, `<leader>sw` grep word, `<leader>xt` TODOs, `<leader>gh` git hunks, `<leader>cr/ci/ct` LSP pickers, `<leader>cl` cursor line, `<leader>y` yank path, `<leader>ql` loclist toggle, `<leader>qd` diagnostics to loclist, `]q`/`[q` quickfix nav, `<leader>vu` undotree, `<leader>vr` usage report.
 - `custom.usage` tracks keymap/plugin/command usage to `usage.json`; `:UsageReport` and `:UsageReset`.
 - `<leader>fs` workspace symbol search via `mini.extra` LSP picker (`workspace_symbol_live`).
 - `<leader>fo` symbol outline (Aerial); moved off `<leader>ao` so `<leader>a` stays AI-only.

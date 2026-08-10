@@ -111,4 +111,38 @@ function M.grep_word(opts)
   return builtin('grep', vim.tbl_extend('force', { pattern = word }, opts or {}))
 end
 
+function M.harpoon(opts)
+  reset_msgarea()
+
+  local harpoon = require 'harpoon'
+  harpoon:setup()
+  local list = harpoon:list()
+  local items = {}
+
+  for i = 1, list:length() do
+    local item = list:get(i)
+    if item and item.value and item.value ~= '' then
+      items[#items + 1] = {
+        text = string.format('[%d] %s', i, item.value),
+        idx = i,
+      }
+    end
+  end
+
+  if #items == 0 then
+    require('custom.msgarea').echo_warn 'Harpoon list is empty — use <leader>ha to add files'
+    return
+  end
+
+  require('mini.pick').start(vim.tbl_deep_extend('force', {
+    source = {
+      name = 'Harpoon',
+      items = items,
+      choose = function(item)
+        list:select(item.idx)
+      end,
+    },
+  }, opts or {}))
+end
+
 return M
