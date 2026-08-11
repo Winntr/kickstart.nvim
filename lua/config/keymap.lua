@@ -71,6 +71,12 @@ end, { desc = 'Grep word under cursor' })
 
 map('n', '<leader>xt', '<cmd>TodoTrouble<cr>', { desc = 'Project TODOs' })
 
+map('n', '<leader>xf', function()
+  if not vim.diagnostic.open_float(0, { scope = 'line' }) then
+    require('custom.msgarea').echo_status 'No diagnostics on this line'
+  end
+end, { desc = 'Diagnostic float (line)' })
+
 map('n', '<leader>gh', function()
   pickers().git_hunks()
 end, { desc = 'Git hunks picker' })
