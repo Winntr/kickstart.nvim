@@ -14,6 +14,7 @@
 - Task panel toggle after hide: nui clears split `winid` when hidden; `is_open()` now guards before `nvim_win_is_valid`.
 
 ### Added
+- `laytan/cloak.nvim` masks secret values in `.env*` files (default `=.+` pattern); Telescope preview cloaking enabled.
 - `<leader>xf` shows line diagnostics in a floating window (wraps; avoids clipped inline virtual text).
 - Expanded find/search/code keymaps via `mini.extra` pickers: `<leader>f.` recent files, `<leader>fd` document symbols, `<leader>fk` keymap search, `<leader>fl` symbol breadcrumbs (moved from `<leader>ls`), `<leader>sd` diagnostics, `<leader>sw` grep word, `<leader>xt` TODOs, `<leader>gh` git hunks, `<leader>cr/ci/ct` LSP pickers, `<leader>cl` cursor line, `<leader>y` yank path, `<leader>ql` loclist toggle, `<leader>qd` diagnostics to loclist, `]q`/`[q` quickfix nav, `<leader>vu` undotree, `<leader>vr` usage report.
 - `custom.usage` tracks keymap/plugin/command usage to `usage.json`; `:UsageReport` and `:UsageReset`.

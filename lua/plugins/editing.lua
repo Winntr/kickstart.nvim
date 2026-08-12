@@ -71,4 +71,12 @@ return {
       handler_options = { search_engine = 'duckduckgo' },
     },
   },
+
+  {
+    'laytan/cloak.nvim',
+    event = 'BufReadPre',
+    opts = {
+      cloak_telescope = true,
+    },
+  },
 }
