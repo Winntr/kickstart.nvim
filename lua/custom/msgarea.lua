@@ -1,6 +1,25 @@
 --- Helpers for dismissing and routing lightweight output through msgarea.nvim.
 local M = {}
 
+--- @return table?
+local function view()
+  local ok, mod = pcall(require, 'msgarea.view')
+  return ok and mod or nil
+end
+
+--- @return boolean
+local function has_windows()
+  local v = view()
+  if not v then
+    return false
+  end
+  local windows = v.state.windows
+  if windows.ephemeral then
+    return true
+  end
+  return windows[1] ~= nil
+end
+
 --- @return boolean
 function M.available()
   if vim.fn.has 'nvim-0.12' ~= 1 then
@@ -11,20 +30,16 @@ end
 
 --- @return boolean
 function M.is_open()
-  if not M.available() then
-    return false
-  end
-  local msgarea = require 'msgarea'
-  return #msgarea.state.active_windows > 0
+  return M.available() and has_windows()
 end
 
 --- @return boolean
 function M.is_visible()
-  if not M.is_open() then
+  local v = view()
+  if not v or not has_windows() then
     return false
   end
-  local msgarea = require 'msgarea'
-  return vim.o.cmdheight > msgarea.original_cmdheight
+  return vim.o.cmdheight > v.original_cmdheight
 end
 
 --- Hide msgarea windows without destroying them (can be shown again).
@@ -46,20 +61,15 @@ function M.show()
   if not M.available() then
     return false
   end
-  local msgarea = require 'msgarea'
-  if #msgarea.state.active_windows == 0 then
+  if not has_windows() then
     vim.notify('No msgarea windows to show', vim.log.levels.WARN)
     return false
   end
 
-  if msgarea.state.focused == nil then
-    local last = msgarea.get_last_focused()
-    msgarea.state.focused = last or msgarea.state.active_windows[1].winid
-  end
+  require('msgarea').show { flush = true }
 
-  msgarea.show()
-
-  local winid = msgarea.state.focused
+  local v = view()
+  local winid = v and v.state.focused
   if winid and vim.api.nvim_win_is_valid(winid) then
     vim.api.nvim_set_current_win(winid)
   end
@@ -83,9 +93,8 @@ function M.close()
   if not M.available() then
     return false
   end
-  local msgarea = require 'msgarea'
-  local had_windows = #msgarea.state.active_windows > 0
-  msgarea.close_all()
+  local had_windows = has_windows()
+  require('msgarea').close_all()
   return had_windows
 end
 

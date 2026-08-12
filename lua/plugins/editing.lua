@@ -3,9 +3,6 @@ return {
     'echasnovski/mini.nvim',
     version = false,
     event = 'VeryLazy',
-    dependencies = {
-      { 'edisj/msgarea.nvim', optional = true },
-    },
     config = function()
       require('mini.ai').setup {
         n_lines = 500,
@@ -74,6 +71,7 @@ return {
 
   {
     'laytan/cloak.nvim',
+    enabled = false,
     event = 'BufReadPre',
     opts = {
       cloak_telescope = true,

@@ -8,6 +8,8 @@ return {
     init = function()
       vim.g.msgarea_max_height = 15
       vim.g.msgarea_min_height = 3
+      -- ponytail: must patch ui2.msg_show before any routed message hits built-in handler
+      require('msgarea').setup()
     end,
     config = function()
       local msgarea_util = require 'custom.msgarea'
@@ -46,8 +48,8 @@ return {
           if not msgarea_util.available() then
             return
           end
-          local msgarea = require 'msgarea'
-          for _, win in ipairs(msgarea.state.active_windows) do
+          local view = require 'msgarea.view'
+          for _, win in ipairs(view.state.windows) do
             if win.winid == ev.win then
               vim.wo[ev.win].winfixbuf = true
               return
