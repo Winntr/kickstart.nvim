@@ -32,10 +32,14 @@ return {
         mysql = { "sqlfluff" },
         plsql = { "sqlfluff" },
         pgsql = { "sqlfluff" },
+        redshift = { "sqlfluff" },
       },
       formatters = {
         sqlfluff = {
-          args = { 'format', '--dialect=ansi', '-' },
+          args = function(_, ctx)
+            local dialect = vim.b[ctx.buf].sqlfluff_dialect or 'ansi'
+            return { 'format', '--dialect=' .. dialect, '-' }
+          end,
         },
       },
       format_on_save = {
@@ -51,6 +55,16 @@ return {
     config = function()
       local lint = require("lint")
 
+      lint.linters.sqlfluff = {
+        cmd = 'sqlfluff',
+        stdin = true,
+        append_fname = true,
+        args = function()
+          local dialect = vim.b.sqlfluff_dialect or 'ansi'
+          return { 'lint', '--dialect=' .. dialect, '-' }
+        end,
+      }
+
       lint.linters_by_ft = {
         python = { "ruff" },
         javascript = { "eslint_d" },
@@ -59,6 +73,7 @@ return {
         mysql = { "sqlfluff" },
         plsql = { "sqlfluff" },
         pgsql = { "sqlfluff" },
+        redshift = { "sqlfluff" },
       }
 
       vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost" }, {

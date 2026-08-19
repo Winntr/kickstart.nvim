@@ -190,8 +190,19 @@ return {
         end,
       })
 
+      local sqlls_connections = {}
+      pcall(function()
+        pcall(require, 'config.local')
+        sqlls_connections = require('custom.db_url').sqlls_connections()
+      end)
+
       vim.lsp.config('sqlls', {
-        filetypes = { 'sql', 'mysql', 'plsql', 'pgsql' },
+        filetypes = { 'sql', 'mysql', 'plsql', 'pgsql', 'redshift' },
+        settings = {
+          sqlLanguageServer = {
+            connections = sqlls_connections,
+          },
+        },
       })
 
       vim.lsp.config('gopls', {

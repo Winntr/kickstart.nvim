@@ -47,6 +47,7 @@ return {
           mysql = { 'lsp', 'path', 'snippets', 'buffer', 'emoji' },
           plsql = { 'lsp', 'path', 'snippets', 'buffer', 'emoji' },
           pgsql = { 'lsp', 'path', 'snippets', 'buffer', 'emoji' },
+          redshift = { 'lsp', 'path', 'snippets', 'buffer', 'emoji' },
         },
         providers = {
           avante_commands = {

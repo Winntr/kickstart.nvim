@@ -1,6 +1,9 @@
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+vim.opt.exrc = true
+vim.opt.secure = true
+
 vim.g.have_nerd_font = not vim.g.vscode
 vim.g.ai_cmp = false
 

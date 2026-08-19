@@ -1,0 +1,10 @@
+-- Optional local overrides (gitignored copy of this file → lua/config/local.lua)
+
+-- DataGrip executable if not on PATH:
+-- vim.g.datagrip_exe = 'C:\\Program Files\\JetBrains\\DataGrip 2023.3.4\\bin\\datagrip64.exe'
+
+-- DataGrip project (default: ~/DataGripProjects/Main):
+-- vim.g.datagrip_project = vim.fn.expand('$USER_HOME/DataGripProjects/Main')
+
+-- Optional sqlls connections via env vars (see documentation/SQL.md):
+-- $env:REDSHIFT_URL, $env:AURORA_PG_URL, $env:AURORA_MYSQL_URL

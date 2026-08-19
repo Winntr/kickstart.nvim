@@ -1,7 +1,9 @@
 ## [Unreleased]
 
+### Added
+- DataGrip launcher for SQL execution (`custom.datagrip`, `<leader>Dg`/`Dt` open file, `<leader>Dp` open Main project). Uses existing JDBC drivers and data sources — no driver hijacking. Removed Harlequin integration.
+
 ### Removed
-- Dadbod / DBUI SQL workflow (`vim-dadbod`, `vim-dadbod-ui`, `vim-dadbod-completion`, `lua/plugins/sql.lua`, `custom.db_url`, `<leader>D` keymaps). Use DataGrip or another client to run queries; Neovim keeps `sqlls` + `sqlfluff` for editing.
 
 ### Fixed
 - Harpoon menu now opens via `mini.pick` (`<leader>hh`); added `<leader>hs1-4` to assign slots, `<leader>hp`/`hn` prev/next, and feedback when jumping to empty slots.
