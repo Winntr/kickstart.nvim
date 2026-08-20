@@ -33,6 +33,9 @@ function M.setup()
   map('n', '<leader>w<', '<cmd>vertical resize -2<cr>', { desc = 'Window narrower' })
 
   map('n', '<leader>wb', '<cmd>bd<cr>', { desc = 'Buffer close' })
+  map('n', '<leader>wB', function()
+    require('misc.pickers').close_buffers()
+  end, { desc = 'Buffer close picker' })
   map('n', '<leader>wn', '<cmd>bnext<cr>', { desc = 'Buffer next' })
   map('n', '<leader>wp', '<cmd>bprevious<cr>', { desc = 'Buffer previous' })
 

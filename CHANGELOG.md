@@ -1,6 +1,7 @@
 ## [Unreleased]
 
 ### Added
+- `<leader>wB` buffer close picker via `mini.pick`: closes listed buffers (including the current one) and, when the focused buffer is closed, shows the next buffer in the list instead of inheriting from another split.
 - DataGrip launcher for SQL execution (`custom.datagrip`, `<leader>Dg`/`Dt` open file, `<leader>Dp` open Main project). Uses existing JDBC drivers and data sources — no driver hijacking. Removed Harlequin integration.
 
 ### Removed
