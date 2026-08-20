@@ -1,6 +1,7 @@
 require 'config.options'
 require 'config.global'
 require 'config.autocommands'
+require 'config.sql'
 require('config.ui2').setup()
 
 local venv_base = vim.fn.stdpath 'data' .. '/venv'

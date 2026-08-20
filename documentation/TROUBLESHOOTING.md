@@ -1,5 +1,24 @@
 # Troubleshooting
 
+## Startup error: `Invalid plugin spec` for DataGrip
+
+If Neovim fails in `init.lua` and the error block mentions `DataGrip`,
+`DataGripFile`, or `DataGripProject`, the cause is a lazy.nvim validation
+error: those SQL/DataGrip helpers are normal config, not a real plugin spec.
+
+Expected state in this config:
+
+- `init.lua` loads `lua/config/sql.lua`
+- `lua/plugins/sql.lua` returns an empty spec list
+
+Quick verification:
+
+```powershell
+nvim --headless -c "qa"
+```
+
+That command should exit cleanly with no `Invalid plugin spec` output.
+
 ## Lazygit AI commit (`G` in lazygit)
 
 Triggered from `<leader>gg` → lazygit → **`G`** (custom command). Runs `scripts/lazygit-ai-commit.ps1` via PowerShell.

@@ -6,6 +6,7 @@
 ### Removed
 
 ### Fixed
+- Neovim startup no longer fails with `Invalid plugin spec` for the DataGrip SQL helpers; moved that config out of `lua/plugins/sql.lua` so lazy.nvim only sees real plugin specs.
 - msgarea startup `Invalid 'buf'` during lazy.nvim load: ui2 kinds now bootstrap to `cmd` until `msgarea.setup()` patches `msg_show` (lazy reports spec errors before plugin `init`).
 - msgarea `<Esc>` now collapses `cmdheight` after large multiline errors (upstream `hide()` hides windows but does not reset height unless `cmdheight` is passed).
 - Restored filepath breadcrumbs: lualine `short_path` / `truncated_path` in the statusline and dropbar winbar via explicit `opts = {}` so lazy.nvim calls `setup()` on load.
