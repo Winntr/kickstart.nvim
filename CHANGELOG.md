@@ -6,7 +6,8 @@
 ### Removed
 
 ### Fixed
-- Harpoon menu now opens via `mini.pick` (`<leader>hh`); added `<leader>hs1-4` to assign slots, `<leader>hp`/`hn` prev/next, and feedback when jumping to empty slots.
+- msgarea startup `Invalid 'buf'` during lazy.nvim load: ui2 kinds now bootstrap to `cmd` until `msgarea.setup()` patches `msg_show` (lazy reports spec errors before plugin `init`).
+- msgarea `<Esc>` now collapses `cmdheight` after large multiline errors (upstream `hide()` hides windows but does not reset height unless `cmdheight` is passed).
 - Restored filepath breadcrumbs: lualine `short_path` / `truncated_path` in the statusline and dropbar winbar via explicit `opts = {}` so lazy.nvim calls `setup()` on load.
 - Cursor done notifications: acknowledge now suppresses repeat alerts; defer while agent split focused; alert on WinLeave/TermLeave; detect all agent tabs; single Windows toast (no duplicate vim.notify).
 - Go LSP: enable `gopls`; restore `:LspInfo` / `:LspRestart` / `:LspLog` aliases for Neovim 0.12 (`:checkhealth vim.lsp`, `:lsp restart`).
