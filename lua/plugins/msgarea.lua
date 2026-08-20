@@ -8,8 +8,9 @@ return {
     init = function()
       vim.g.msgarea_max_height = 15
       vim.g.msgarea_min_height = 3
-      -- ponytail: must patch ui2.msg_show before any routed message hits built-in handler
+      -- ponytail: patch ui2.msg_show, then retarget kinds lazy may have already echoed
       require('msgarea').setup()
+      require('config.ui2').set_msgarea_targets 'msgarea'
     end,
     config = function()
       local msgarea_util = require 'custom.msgarea'

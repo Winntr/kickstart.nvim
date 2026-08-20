@@ -51,7 +51,10 @@ function M.hide()
   if not M.is_visible() then
     return false
   end
-  require('msgarea').hide()
+  local v = view()
+  local original = v and v.original_cmdheight or 1
+  -- ponytail: upstream hide() does not collapse cmdheight unless passed explicitly
+  require('msgarea').hide({ cmdheight = original })
   return true
 end
 
@@ -110,6 +113,15 @@ end
 function M.dismiss_or_fallback()
   if M.is_visible() then
     M.hide()
+    return
+  end
+  -- ponytail: cmdheight can stay expanded after a multiline error even when windows are gone
+  local v = view()
+  if v and vim.o.cmdheight > v.original_cmdheight then
+    vim.o.cmdheight = v.original_cmdheight
+    pcall(function()
+      require('vim._core.ui2').cmdheight = v.original_cmdheight
+    end)
     return
   end
   if M.close() then
