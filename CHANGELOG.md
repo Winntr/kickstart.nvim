@@ -1,6 +1,7 @@
 ## [Unreleased]
 
 ### Added
+- `akinsho/toggleterm.nvim` replaces Snacks terminal: `<C-\>` toggle, `<C-\>v` opens the next terminal in a vertical split (uses toggleterm's split-from-existing logic; `TermNew` is not in this plugin version), `<C-\>q` or `q` (normal mode) close without `:bd` confirm; `<C-h/j/k/l>` window nav from terminal insert.
 - `<leader>wB` buffer close picker via `mini.pick`: closes listed buffers (including the current one) and, when the focused buffer is closed, shows the next buffer in the list instead of inheriting from another split.
 - DataGrip launcher for SQL execution (`custom.datagrip`, `<leader>Dg`/`Dt` open file, `<leader>Dp` open Main project). Uses existing JDBC drivers and data sources — no driver hijacking. Removed Harlequin integration.
 
@@ -53,7 +54,7 @@
 - `wtf.nvim` diagnose/fix status messages now route through msgarea instead of Snacks notifier toasts.
 - `mini.pick` clears stale msgarea content before opening in the msgarea region.
 - Migrated LSP setup to native `vim.lsp.config()` / `vim.lsp.enable()` for Neovim 0.12.
-- Replaced Telescope-first navigation with `mini.pick`; Snacks now covers terminal, lazygit, notifier, and statuscolumn only.
+- Replaced Telescope-first navigation with `mini.pick`; Snacks now covers lazygit, notifier, and statuscolumn only (terminal moved to toggleterm).
 - Aggressively reduced default keymaps; trimmed `which-key.nvim` to group labels only (no manual keymap tree).
 - Disabled overlapping AI plugins by default (`codecompanion`, `wtf`, `agentic`); kept Copilot, Avante (Cursor ACP), and 99 (Cursor CLI `--print`).
 - Pruned unused colorscheme specs; Kanagawa remains the active theme.

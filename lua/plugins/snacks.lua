@@ -73,9 +73,7 @@ return {
           notify = true,
         },
       },
-      terminal = {
-        win = { style = 'terminal', position = 'bottom' },
-      },
+      terminal = { enabled = false },
       lazygit = {
         enabled = true,
         configure = true,
@@ -89,14 +87,6 @@ return {
       },
     },
     keys = {
-      {
-        '<C-\\>',
-        function()
-          Snacks.terminal()
-        end,
-        desc = 'Toggle terminal',
-        mode = { 'n', 't' },
-      },
       {
         '<leader>gg',
         with_lazygit_config(function()
