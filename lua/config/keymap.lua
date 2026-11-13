@@ -1,6 +1,9 @@
 local map = vim.keymap.set
 
 map('n', '<Esc>', function()
+  if vim.bo.filetype == 'snacks_input' then
+    return
+  end
   require('custom.msgarea').dismiss_or_fallback()
 end, { desc = 'Hide/close msgarea or clear search highlight' })
 map('n', '<C-h>', '<C-w>h', { desc = 'Window left' })

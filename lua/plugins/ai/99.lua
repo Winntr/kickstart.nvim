@@ -1,22 +1,22 @@
-local cursor_agent = require 'custom.cursor_agent'
-
 return {
   {
     'ThePrimeagen/99',
-    init = function()
-      require('custom.patches.agentic_acp_transport').apply()
-    end,
     config = function()
       local _99 = require '99'
-      local CursorCliProvider = require 'custom.patches.99'
+      local Provider = _99.Providers.ClaudeCodeProvider
+      local MODEL = vim.env.CLAUDE_99_MODEL or 'claude-sonnet-5-5'
+      -- ponytail: claude CLI can't list models; built-in list is stale, so hardcode current ids
+      Provider.fetch_models = function(callback)
+        callback({ 'claude-fable-5-2', 'claude-opus-5-5', 'claude-sonnet-5-5', 'claude-haiku-5-5' }, nil)
+      end
 
       local cwd = vim.uv.cwd()
       local basename = vim.fs.basename(cwd)
       local log_path = vim.fs.joinpath(vim.fn.stdpath 'state', '99', basename .. '.debug.log')
 
       _99.setup {
-        provider = CursorCliProvider,
-        model = cursor_agent.MODEL_COMPOSER_25,
+        provider = Provider,
+        model = MODEL,
         logger = {
           level = _99.INFO,
           type = 'file',

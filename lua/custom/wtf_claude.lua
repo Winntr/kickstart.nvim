@@ -1,11 +1,10 @@
---- Cursor CLI backend for wtf.nvim diagnose/fix commands.
---- Uses `cursor-agent --print` (one-shot), not ACP. Reuses wtf.nvim UI utilities.
-local cursor_agent = require 'custom.cursor_agent'
+--- Claude Code CLI backend for wtf.nvim diagnose/fix commands.
+--- Uses `claude --print` (one-shot). Reuses wtf.nvim UI utilities.
 local msgarea = require 'custom.msgarea'
 
 local M = {}
 
-local MODEL = cursor_agent.MODEL_COMPOSER_25
+local MODEL = vim.env.WTF_CLAUDE_MODEL or 'sonnet'
 
 --- @param system string
 --- @param message string
@@ -13,27 +12,26 @@ local MODEL = cursor_agent.MODEL_COMPOSER_25
 --- @return string? error
 function M.query(system, message)
   local prompt = system .. '\n\n' .. message
-  local command, env = cursor_agent.print_command(prompt, MODEL)
-  local result = vim.system(command, { text = true, env = env }):wait()
+  local result = vim.system({ 'claude', '--model', MODEL, '--print', prompt }, { text = true }):wait()
 
   if result.code ~= 0 then
     local err = vim.trim(result.stderr or '')
     if err == '' then
-      err = 'Cursor CLI request failed'
+      err = 'Claude CLI request failed'
     end
     return nil, err
   end
 
   local output = vim.trim(result.stdout or '')
   if output == '' then
-    return nil, 'Cursor CLI returned an empty response'
+    return nil, 'Claude CLI returned an empty response'
   end
 
   return output, nil
 end
 
 local function notify_started(action)
-  msgarea.echo_status(string.format('%s with Cursor CLI: %s', action, MODEL))
+  msgarea.echo_status(string.format('%s with Claude CLI: %s', action, MODEL))
 end
 
 --- @param response string

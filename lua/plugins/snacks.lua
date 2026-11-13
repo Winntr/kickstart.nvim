@@ -4,7 +4,7 @@ local function lazygit_ai_config_path()
   vim.fn.writefile({
     'customCommands:',
     '  - key: "G"',
-    '    description: "AI commit message (Cursor agent)"',
+    '    description: "AI commit message (Claude Code)"',
     '    context: "files"',
     '    loadingText: "Generating commit message..."',
     '    prompts:',

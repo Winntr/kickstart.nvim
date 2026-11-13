@@ -6,7 +6,12 @@ return {
       return not vim.g.vscode
     end,
     dependencies = {
-      { 'williamboman/mason.nvim', opts = {} },
+      {
+        'williamboman/mason.nvim',
+        opts = function()
+          return require('config.artifactory').mason()
+        end,
+      },
       'WhoIsSethDaniel/mason-tool-installer.nvim',
       { 'j-hui/fidget.nvim', opts = {} },
     },

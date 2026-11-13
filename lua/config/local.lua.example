@@ -1,5 +1,12 @@
 -- Optional local overrides (gitignored copy of this file → lua/config/local.lua)
 
+-- Mason / Artifactory (optional; defaults in lua/config/artifactory.lua)
+-- PyPI: use %APPDATA%\pip\pip.ini with JFrog USERNAME (not npm email=) + token. See documentation/ARTIFACTORY.md.
+-- Or env: $env:ARTIFACTORY_PYPI_INDEX_URL = 'https://JFROG_USER:TOKEN@acadartifactory.jfrog.io/artifactory/api/pypi/pypi/simple'
+--   $env:ARTIFACTORY_NPM_REGISTRY = 'https://acadartifactory.jfrog.io/artifactory/api/npm/npm/'
+-- vim.g.mason_pip_install_args = { '--index-url', '...', '--trusted-host', 'acadartifactory.jfrog.io' }
+-- vim.g.mason_npm_install_args = { '--registry', 'https://acadartifactory.jfrog.io/artifactory/api/npm/npm/' }
+
 -- DataGrip executable if not on PATH:
 -- vim.g.datagrip_exe = 'C:\\Program Files\\JetBrains\\DataGrip 2023.3.4\\bin\\datagrip64.exe'
 

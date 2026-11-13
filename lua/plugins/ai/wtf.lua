@@ -8,7 +8,7 @@ return {
     },
     opts = {
       -- Built-in provider is only used for history/search UI paths.
-      -- Diagnose/fix AI calls go through `custom.wtf_cursor` (Cursor CLI --print).
+      -- Diagnose/fix AI calls go through `custom.wtf_claude` (Claude CLI --print).
       provider = 'ollama',
       picker = 'snacks',
       providers = {
@@ -22,7 +22,7 @@ return {
         '<leader>awd',
         mode = { 'n', 'x' },
         function()
-          require('custom.wtf_cursor').diagnose()
+          require('custom.wtf_claude').diagnose()
         end,
         desc = 'Debug diagnostic with AI',
       },
@@ -30,7 +30,7 @@ return {
         '<leader>awf',
         mode = { 'n', 'x' },
         function()
-          require('custom.wtf_cursor').fix()
+          require('custom.wtf_claude').fix()
         end,
         desc = 'Fix diagnostic with AI',
       },

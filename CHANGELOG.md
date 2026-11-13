@@ -1,7 +1,33 @@
 ## [Unreleased]
 
+### Changed
+- All AI tooling moved to Claude Code: `coder/claudecode.nvim` (`<leader>ai`, `<leader>ak*`), 99.nvim via built-in `ClaudeCodeProvider`, wtf.nvim via `custom.wtf_claude`, lazygit AI commit via `claude --print`.
+
+### Removed
+- OMP/Pi (`omp.nvim`, `custom.pi_*`), Cursor agent (`neovim-cursor`, `custom.cursor_*`, ACP patches), and Avante (plus its blink.compat sources).
+
 ### Added
-- `akinsho/toggleterm.nvim` replaces Snacks terminal: `<C-\>` toggle, `<C-\>v` opens the next terminal in a vertical split (uses toggleterm's split-from-existing logic; `TermNew` is not in this plugin version), `<C-\>q` or `q` (normal mode) close without `:bd` confirm; `<C-h/j/k/l>` window nav from terminal insert.
+- Mason Artifactory defaults (`lua/config/artifactory.lua`) for ACA npm/PyPI; `documentation/ARTIFACTORY.md`.
+
+### Fixed
+- Python format-on-save: use `ruff_organize_imports` + `ruff_format` instead of isort/black (500ms conform timeout).
+- Mason PyPI installs: pip extra args use `pip.ini` auth (`--trusted-host` only) instead of overriding with an unauthenticated `--index-url`.
+- Pi prompts (`<leader>aa`/`as`/`an`) bypass snacks.nvim input so **single Esc cancels**; when the `<leader>ai` terminal is open, asks paste into that session via `custom.pi_bridge` instead of a separate background RPC.
+- neovim-cursor `plugin/neovim-cursor.lua` no longer registers default `<leader>ai`/`an`/`at`/`ar` Cursor maps that conflicted with Pi (`lazy` init guard + stale map cleanup).
+
+### Added
+- `swairshah/pi.nvim` for Pi + GitHub Copilot: `<leader>aa` ask, `<leader>ai` terminal, `<leader>ax` cancel, `<leader>am` model, `<leader>at` status (`lua/plugins/ai/pi.lua`).
+- `custom.pi_agent` shared Pi CLI helpers for subprocess `--print` mode.
+
+### Changed
+- Pi terminal (`<leader>ai`) uses toggleterm vertical split (~45% width) instead of pi.nvim's bottom horizontal split (`custom.pi_terminal`).
+- Replaced `carderne/pi-nvim` with `swairshah/pi.nvim` (background Pi RPC, `vim.ui.input` prompts, Esc to cancel, `<leader>ax` to abort). Removed `custom.pi_terminal` and `custom.pi_bridge`.
+- Cursor CLI agent (`neovim-cursor`) keymaps moved under `<leader>ac*`: `<leader>aca` toggle, `<leader>acn` new, `<leader>act` select, `<leader>acr` rename, `<leader>acs`/`acf`/`acB`/`acF` context and focus.
+- 99.nvim provider switched from `CursorCliProvider` to `PiCliProvider` (`pi --print --provider github-copilot`); default model `claude-sonnet-5` (override: `$env:PI_99_MODEL`).
+- which-key: `<leader>a` = Pi Agent, `<leader>ac` = Cursor Agent.
+
+### Added
+- `akinsho/toggleterm.nvim` replaces Snacks terminal: `<C-\>` toggle all, `<A-t>` new split (does not share the `<C-\>` prefix), `<A-q>` or `q` (normal mode) close one terminal; `<C-h/j/k/l>` window nav from terminal insert.
 - `<leader>wB` buffer close picker via `mini.pick`: closes listed buffers (including the current one) and, when the focused buffer is closed, shows the next buffer in the list instead of inheriting from another split.
 - DataGrip launcher for SQL execution (`custom.datagrip`, `<leader>Dg`/`Dt` open file, `<leader>Dp` open Main project). Uses existing JDBC drivers and data sources — no driver hijacking. Removed Harlequin integration.
 

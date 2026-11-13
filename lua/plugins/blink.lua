@@ -4,7 +4,6 @@ return {
     version = '1.*',
     event = { 'InsertEnter', 'CmdlineEnter' },
     dependencies = {
-      'saghen/blink.compat',
       'moyiz/blink-emoji.nvim',
       'L3MON4D3/LuaSnip',
       'rafamadriz/friendly-snippets',
@@ -50,26 +49,6 @@ return {
           redshift = { 'lsp', 'path', 'snippets', 'buffer', 'emoji' },
         },
         providers = {
-          avante_commands = {
-            name = 'avante_commands',
-            module = 'blink.compat.source',
-            score_offset = 90,
-          },
-          avante_files = {
-            name = 'avante_files',
-            module = 'blink.compat.source',
-            score_offset = 100,
-          },
-          avante_mentions = {
-            name = 'avante_mentions',
-            module = 'blink.compat.source',
-            score_offset = 1000,
-          },
-          avante_shortcuts = {
-            name = 'avante_shortcuts',
-            module = 'blink.compat.source',
-            score_offset = 1000,
-          },
           emoji = {
             name = 'Emoji',
             module = 'blink-emoji',

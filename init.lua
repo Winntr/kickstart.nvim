@@ -1,4 +1,5 @@
 require 'config.options'
+pcall(require, 'config.local')
 require 'config.global'
 require 'config.autocommands'
 require 'config.sql'

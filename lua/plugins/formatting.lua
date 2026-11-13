@@ -16,7 +16,8 @@ return {
     opts = {
       formatters_by_ft = {
         lua = { "stylua" },
-        python = { "ruff_format", "isort", "black" },
+        -- ponytail: ruff replaces isort + black; three Python CLIs exceeded 500ms timeout on save
+        python = { "ruff_organize_imports", "ruff_format" },
         javascript = { "prettierd", "prettier", stop_after_first = true },
         typescript = { "prettierd", "prettier", stop_after_first = true },
         typescriptreact = { "prettierd", "prettier", stop_after_first = true },
@@ -43,7 +44,7 @@ return {
         },
       },
       format_on_save = {
-        timeout_ms = 500,
+        timeout_ms = 3000,
         lsp_fallback = true,
       },
     },

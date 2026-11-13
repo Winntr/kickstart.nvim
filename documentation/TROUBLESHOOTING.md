@@ -19,40 +19,6 @@ nvim --headless -c "qa"
 
 That command should exit cleanly with no `Invalid plugin spec` output.
 
-## Lazygit AI commit (`G` in lazygit)
-
-Triggered from `<leader>gg` → lazygit → **`G`** (custom command). Runs `scripts/lazygit-ai-commit.ps1` via PowerShell.
-
-### Model and initialization
-
-| Setting | Value |
-|---------|--------|
-| **Model** | `composer-2.5-fast` (override: `$env:CURSOR_COMMIT_MODEL`) |
-| **Mode** | Cursor Agent `--print` (one-shot, not ACP) |
-| **Binary** | `%LOCALAPPDATA%\cursor-agent\versions\<latest>\node.exe index.js` (direct; skips `agent.cmd` → PowerShell wrapper) |
-| **Cache** | `NODE_COMPILE_CACHE` → `%LOCALAPPDATA%\cursor-compile-cache` |
-
-Other AI tools in this config use heavier models on purpose (`composer-2.5` for ACP/99). Commit messages use the fast model only.
-
-### Why it was slow (and what changed)
-
-1. **Triple shell hop** — lazygit → PowerShell → `agent.cmd` → PowerShell → `node.exe`. Script now calls `node.exe` directly.
-2. **No model pin** — previously relied on CLI default; now explicitly `composer-2.5-fast`.
-3. **Full diff every time** — diffs truncate at 32k chars; prefer **Staged only** (`s`) when possible.
-4. **Cold start** — each `G` still spawns a fresh Agent process (unavoidable with `--print`). First run after boot is slower; `NODE_COMPILE_CACHE` helps subsequent runs.
-
-### Speed tips
-
-- Stage hunks first, then choose **Staged only** in the menu.
-- Set a faster model if needed: `$env:CURSOR_COMMIT_MODEL = 'gpt-5.5-low'` (PowerShell profile or system env).
-- Large binary-only diffs: stage selectively or commit without `G`.
-
-### Errors
-
-- `Cursor agent not found` — install/update Cursor CLI (`agent` on PATH or Cursor desktop app).
-- `Nothing staged` / `No uncommitted changes` — pick the other scope in the menu.
-- `Failed to generate commit message` — run `agent models` in a terminal; check network and Cursor login.
-
 ## Workspace task panel (`custom.tasks` + `custom.tasks_ui`)
 
 Overseer-style bottom panel built with **nui.nvim** (rounded borders, tree task list, live output pane). Processes use PTY buffers displayed in the output split.
@@ -124,96 +90,18 @@ return {
 
 Implementation: `lua/custom/tasks.lua`, `lua/custom/tasks_ui.lua` (nui.nvim).
 
-## Cursor Agent terminal (neovim-cursor)
+## Claude Code (claudecode.nvim, 99.nvim, wtf.nvim, lazygit)
 
-Primary AI agent workflow: `felixcuello/neovim-cursor` runs `cursor agent` in a Neovim split terminal (no ACP stdio).
+All AI features use the `claude` CLI (must be on PATH and logged in).
 
-### Keymaps
+| Feature | Implementation |
+|---|---|
+| Interactive agent | `coder/claudecode.nvim` (`lua/plugins/ai/claudecode.lua`): `<leader>ai` toggle, `<leader>ak{f,r,c,b,s,y,d}` focus/resume/continue/add buffer/send selection/accept diff/deny diff |
+| 99.nvim (`<leader>9*`) | Built-in `ClaudeCodeProvider` (`claude --print`); model via `$CLAUDE_99_MODEL` (default `claude-sonnet-5-5`) |
+| wtf.nvim diagnose/fix (`<leader>awd`/`awf`) | `lua/custom/wtf_claude.lua`; model via `$WTF_CLAUDE_MODEL` (default `sonnet`) |
+| Lazygit `G` AI commit | `scripts/lazygit-ai-commit.ps1`; model via `$CLAUDE_COMMIT_MODEL` (default `haiku`) |
 
-| Key | Mode | Action |
-|-----|------|--------|
-| `<leader>aa` | Normal | Toggle Cursor agent terminal |
-| `<leader>aa` | Visual | Show agent and send selection as `@file:lines` (does not hide an open agent) |
-| `<leader>as` | Visual | Send selection to agent (`@file:lines`) |
-| `<leader>ac` | Normal | Send current file to agent (`@file`) |
-| `<leader>aB` | Normal | Send all named open buffers to agent (one `@file` per line) |
-| `<leader>af` | Normal | Focus/show agent terminal |
-| `<leader>an` | Normal | Create new agent terminal |
-| `<leader>at` | Normal | Select agent terminal (fuzzy picker; `vim.ui.select` fallback without Telescope) |
-| `<leader>ar` | Normal | Rename active agent terminal |
-
-Context is sent as Cursor `@` references (file path with optional line range), not inline buffer text. Unsaved buffers with no path are skipped with a warning; save the file first.
-
-Implementation: `lua/custom/cursor_chat.lua` (wired from `lua/plugins/ai/neovim_cursor.lua`).
-
-### Commands
-
-- `:CursorAgent` — toggle agent terminal
-- `:CursorAgentNew [prompt]` — new agent session
-- `:CursorAgentSelect` — picker
-- `:CursorAgentRename [name]` — rename
-- `:CursorAgentList` — list sessions
-
-### If the terminal does not open
-
-1. Confirm `cursor` (non-Windows) or `agent` (Windows) is on PATH.
-2. Run `agent` (Windows) or `cursor agent` (other platforms) in a normal terminal and verify it starts.
-3. Run `:Lazy sync` to install `felixcuello/neovim-cursor`.
-4. Check `:messages` for spawn errors.
-
-### Esc in the agent terminal
-
-`neovim-cursor` maps single `<Esc>` to hide the split, which blocks Cursor CLI shortcuts
-and conflicts with double-Esc terminal normal mode. This config patches agent buffers in
-`lua/custom/cursor_terminal_esc.lua`:
-
-| Key | Mode | Action |
-|-----|------|--------|
-| `<Esc>` | Terminal insert | Sent to the agent CLI |
-| `<Esc><Esc>` | Terminal insert | Neovim normal mode in the split |
-| `<Esc><Esc>` | Normal (in split) | Hide the agent window |
-| `<leader>aa` | Normal | Toggle agent |
-| `<leader>aa` | Visual | Send selection to agent (show-only) |
-
-Reopen the agent (`<leader>aa`) after updating this config so existing buffers pick up the patch.
-
-### Done notifications (`custom.cursor_done`)
-
-Alerts when the interactive agent terminal goes quiet after a reply (idle heuristic; the `agent` process does not exit per message).
-
-| Signal | Behavior |
-|--------|----------|
-| Desktop toast | Windows balloon via PowerShell; `notify-send` on Linux if available; otherwise `vim.notify` |
-| Windows Terminal tab | OSC 2 title prefix `[!] ` (e.g. `[!] init.lua - nvim`) |
-| In-editor | Snacks/`vim.notify` with title **Neovim** |
-
-**When it fires:** output stops for **3.5 seconds** (`idle_ms`) while you are **not** focused on the agent split (normal or terminal mode). Sending context via `<leader>as` / `<leader>ac` / `<leader>aB` arms the watcher; typing directly in the agent arms after enough new output lines.
-
-**Clear `[!]` / stop repeat alerts:** focus the agent split (`<leader>af`, click the window, or `TermEnter`). That acknowledges the alert and suppresses repeats until the next send or `:lua require('custom.cursor_done').arm()`.
-
-If you were watching the agent when it finished, the alert is deferred until you leave the split (`WinLeave` / `TermLeave`).
-
-| Command | Action |
-|---------|--------|
-| `:CursorDoneToggle` | Enable/disable alerts |
-
-**Windows Terminal:** profile setting **Suppress title changes** must be **off**, or OSC title updates are ignored.
-
-**Customize** in `lua/plugins/ai/neovim_cursor.lua` after `done.setup()`:
-
-```lua
-done.setup({
-  idle_ms = 4000,
-  message = 'Cursor agent finished responding',
-  title_prefix = '[!] ',
-})
-```
-
-**False positives:** slow streaming with pauses longer than `idle_ms`. Increase `idle_ms` if needed.
-
-**Missed alerts:** ensure the agent buffer is detected (`:lua print(require('custom.cursor_done').watch_buf(vim.fn.bufnr()))` after focusing agent). Multiple agent tabs each need `watch_buf`; context sends arm only the active tab.
-
-Implementation: `lua/custom/cursor_done.lua`.
+If something fails, run `claude --print "hello"` in a terminal first. 99's `ClaudeCodeProvider` passes `--dangerously-skip-permissions`.
 
 ## Mermaid diagrams in markdown
 
@@ -257,89 +145,6 @@ Implementation: `lua/plugins/mermaid.lua`, `lua/custom/mermaid_markdown.lua`, `l
 ### Legacy: Avante Cursor ACP
 
 `avante.nvim` is disabled (`enabled = false` in `lua/plugins/ai/avante.lua`). Notes below are kept for reference if you re-enable ACP.
-
-## Agentic Cursor ACP on Windows (legacy)
-
-Deprecated: `agentic.nvim` is disabled. `avante.nvim` Cursor ACP is also disabled; use `neovim-cursor` above. Spawn notes below apply only if you re-enable an ACP client.
-
-If Avante with `provider = 'cursor-acp'` fails with `Failed to initialize` and `{ code = -32000, message = "disconnected" }`, check how the provider process is launched.
-
-### Required launch shape
-
-Agentic must start Cursor in ACP stdio mode (Avante uses the same shape):
-
-- `node.exe <cursor-agent>/index.js acp` on Windows, or
-- `cursor-agent acp` / `agent acp` on other platforms
-
-The `acp` subcommand is required. Launching `node.exe` with only `index.js` starts the interactive CLI and breaks ACP.
-
-### Do not use PowerShell or `.cmd` wrappers for Agentic ACP
-
-`agent.cmd` and `cursor-agent.ps1` are fine for interactive terminal use, but Agentic spawns the provider with libuv stdio pipes. On Windows, launching through `powershell.exe -File ... acp` or `agent.cmd acp` can exit immediately or fail to attach stdio, which produces the `disconnected` error.
-
-This config uses `lua/custom/cursor_agent.lua` function `acp_provider()` to spawn the latest installed Cursor Agent `node.exe` directly with `index.js acp` and the wrapper env vars (`CURSOR_INVOKED_AS`, `NODE_COMPILE_CACHE`).
-
-### Windows Terminal tab spam
-
-If opening Agentic creates many Windows Terminal tabs, the cause is usually libuv spawning the ACP child with `detached = true`, which can allocate a new visible console per launch.
-
-This config applies `lua/custom/patches/agentic_acp_transport.lua` before Avante loads. It sets `hide = true` and `detached = false` for ACP provider spawns on Windows so the Cursor agent stays attached to Neovim stdio without opening console windows.
-
-Do not point Avante at `agent-hidden.bat` or other wrappers that use `start /b`; those can also spawn extra terminal tabs.
-
-### Debug steps (legacy ACP)
-
-1. Run `:AvanteToggle` or `<leader>at` and send a short prompt
-2. Run `:checkhealth` and confirm `cursor-agent` / `agent` is on PATH
-3. Confirm `agent status` succeeds in a normal terminal
-4. Use `<leader>aM` / `<leader>am` to switch ACP model/mode after the sidebar is open (config auto-opens it if needed)
-
-### ACP model/mode keybind errors
-
-If `<leader>aM` or `<leader>am` errors with `attempt to index field 'result' (a nil value)` in `sidebar.lua`, the sidebar object existed but was not rendered. This config patches `avante.acp_config_selector` in `lua/custom/patches/avante_acp_selector.lua` to call `sidebar:open({})` first.
-
-If you see `No model options available from cursor-acp ACP agent`, Cursor's ACP server often returns empty `configOptions` (a known Cursor CLI limitation). This config falls back to `cursor-agent models` for `<leader>aM` and static Agent/Plan/Ask modes for `<leader>am`. Runtime model switching may still fail; the default model is set at ACP startup with `--model composer-2.5` in `lua/plugins/ai/avante.lua`.
-
-## 99.nvim with Cursor CLI on Windows
-
-99 uses Cursor Agent in **`--print` subprocess mode**, not stdio ACP. Agentic uses **`acp`** on the same binary. Both share `lua/custom/cursor_agent.lua` for spawning.
-
-On Windows, 99 spawns `node.exe <cursor-agent>/index.js --trust --force --model <id> --print <prompt>`. Do not route this through `agent.cmd` or PowerShell wrappers; redirection can truncate prompts.
-
-`lua/custom/patches/99.lua` registers `CursorCliProvider` with stdout fallback when the model does not write to 99's temp file.
-
-### Keymaps
-
-| Key | Action |
-|-----|--------|
-| `<leader>9v` | Visual selection edit (visual mode) |
-| `<leader>9s` | 99 search |
-| `<leader>9x` | Cancel in-flight requests |
-| `<leader>9m` | Select model |
-
-Default model: `composer-2.5` (`cursor_agent.MODEL_COMPOSER_25`).
-
-## wtf.nvim with Cursor CLI
-
-`wtf.nvim` diagnose/fix commands use `lua/custom/wtf_cursor.lua`, which shells out
-to `cursor-agent --print` through `cursor_agent.print_command()` and uses the same
-Windows-safe `node.exe index.js` spawn path as `99.nvim`.
-
-The wtf plugin itself is configured with a built-in provider (`ollama`) only for
-history/search UI validation. AI diagnose/fix do not use wtf's HTTP client.
-
-### Why this is `--print` and not ACP
-
-`wtf.nvim`'s upstream client is request/response and provider-based. ACP is a
-long-lived stdio protocol intended for agent sessions (used by Avante). For
-single diagnostic explain/fix prompts, `--print` is the correct transport.
-
-### If `wtf` returns empty output or fails
-
-1. Confirm `agent status` works in a terminal.
-2. Confirm `cursor-agent models` returns at least one model.
-3. Verify `<leader>awd` / `<leader>awf` call `custom.wtf_cursor` (not `wtf.diagnose` directly).
-4. Check Neovim messages for stderr from the Cursor CLI subprocess.
 
 ## Trouble workspace diagnostics empty
 
@@ -404,6 +209,14 @@ If the popup still fails to render:
 ## LSP (Neovim 0.12 native API)
 
 Inspect LSP with `:LspInfo` (alias for `:checkhealth vim.lsp`).
+
+### Mason install fails (npm / pip / basedpyright)
+
+PyPI installs need **`%APPDATA%\pip\pip.ini`** with Artifactory credentials. Use your **JFrog username** (not the npm `email=` field) with your identity or API token. Mason is wired in `lua/config/artifactory.lua`; see `documentation/ARTIFACTORY.md`.
+
+npm installs use `%USERPROFILE%\.npmrc`. If PyPI works in a test venv but Mason fails, ensure Mason is not overriding auth: this config avoids a credential-less `--index-url` unless `ARTIFACTORY_PYPI_INDEX_URL` is set.
+
+For GitHub-only packages (`gopls`, `lua-language-server`), fix GitHub access or a release mirror — not only npm/PyPI.
 
 ### basedpyright still runs after removing Mason package
 

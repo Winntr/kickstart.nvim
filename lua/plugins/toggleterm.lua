@@ -1,15 +1,5 @@
-local function open_direction()
-  local open = {}
-  for _, term in ipairs(require('toggleterm.terminal').get_all()) do
-    if term:is_open() then
-      open[#open + 1] = term
-    end
-  end
-  if #open == 0 then
-    return 'vertical'
-  end
-  return open[#open].direction
-end
+--- ponytail: all terminals stay horizontal; toggleterm only supports one direction at a time.
+local DIRECTION = 'horizontal'
 
 local function next_terminal_id()
   local all = require('toggleterm.terminal').get_all(true)
@@ -21,8 +11,15 @@ local function next_terminal_id()
   return #all + 1
 end
 
-local function new_vsplit_terminal()
-  require('toggleterm').toggle(next_terminal_id(), nil, nil, open_direction())
+local function new_split_terminal()
+  local terms = require('toggleterm.terminal')
+  local id = next_terminal_id()
+  local term = terms.get_or_create_term(id, nil, DIRECTION)
+  if term:is_open() then
+    term:focus()
+  else
+    term:open(nil, DIRECTION)
+  end
 end
 
 local function term_id(buf)
@@ -43,7 +40,10 @@ local function close_terminal(buf)
 
   local id = term_id(buf)
   if id then
-    require('toggleterm').toggle(id)
+    local term = require('toggleterm.terminal').get(id)
+    if term and term:is_open() then
+      term:close()
+    end
     return
   end
 
@@ -62,18 +62,16 @@ local function map_terminal(buf)
     close_terminal(buf)
   end, vim.tbl_extend('force', opts, { desc = 'Close terminal' }))
 
-  vim.keymap.set('n', '<C-\\>q', function()
+  vim.keymap.set({ 'n', 't' }, '<A-q>', function()
     close_terminal(buf)
   end, vim.tbl_extend('force', opts, { desc = 'Close terminal' }))
 
-  vim.keymap.set('t', '<C-\\>v', function()
-    vim.cmd.stopinsert()
-    new_vsplit_terminal()
-  end, vim.tbl_extend('force', opts, { desc = 'New terminal (vertical split)' }))
-
-  vim.keymap.set('t', '<C-\\>q', function()
-    close_terminal(buf)
-  end, vim.tbl_extend('force', opts, { desc = 'Close terminal' }))
+  vim.keymap.set({ 'n', 't' }, '<A-t>', function()
+    if vim.api.nvim_get_mode().mode == 't' then
+      vim.cmd.stopinsert()
+    end
+    new_split_terminal()
+  end, vim.tbl_extend('force', opts, { desc = 'New terminal split' }))
 end
 
 return {
@@ -90,13 +88,13 @@ return {
         mode = { 'n', 't' },
       },
       {
-        '<C-\\>v',
-        new_vsplit_terminal,
-        desc = 'New terminal (vertical split)',
+        '<A-t>',
+        new_split_terminal,
+        desc = 'New terminal split',
         mode = { 'n', 't' },
       },
       {
-        '<C-\\>q',
+        '<A-q>',
         close_terminal,
         desc = 'Close terminal',
         mode = { 'n', 't' },
@@ -112,7 +110,7 @@ return {
       open_mapping = false,
       insert_mappings = false,
       terminal_mappings = false,
-      direction = 'horizontal',
+      direction = DIRECTION,
       close_on_exit = true,
       start_in_insert = true,
       persist_mode = true,
@@ -120,8 +118,7 @@ return {
       shade_terminals = false,
     },
     config = function(_, opts)
-      local toggleterm = require 'toggleterm'
-      toggleterm.setup(opts)
+      require('toggleterm').setup(opts)
 
       vim.api.nvim_create_autocmd('TermOpen', {
         pattern = 'term://*toggleterm#*',
