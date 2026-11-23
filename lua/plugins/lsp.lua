@@ -34,21 +34,13 @@ return {
         group = vim.api.nvim_create_augroup('nvim-lsp-attach', { clear = true }),
         callback = function(event)
           local client = vim.lsp.get_client_by_id(event.data.client_id)
-          if client and client.name == 'basedpyright' then
+          if client and client.name == 'pyrefly' then
             local py = project_python(client.root_dir)
-            local settings = vim.tbl_deep_extend('force', client.settings or {}, {
-              basedpyright = {
-                analysis = { diagnosticMode = 'workspace' },
-              },
-              python = py and { pythonPath = py } or {},
-            })
-            client.settings = settings
-            client:notify('workspace/didChangeConfiguration', { settings = settings })
-            vim.defer_fn(function()
-              if client:supports_method('workspace/diagnostic') then
-                vim.lsp.buf.workspace_diagnostics { client_id = client.id }
-              end
-            end, 500)
+            if py then
+              local settings = vim.tbl_deep_extend('force', client.settings or {}, { python = { pythonPath = py } })
+              client.settings = settings
+              client:notify('workspace/didChangeConfiguration', { settings = settings })
+            end
           end
 
           local map = function(keys, func, desc, mode)
@@ -83,20 +75,8 @@ return {
         return vim.fs.root(fname, { 'angular.json', 'nx.json' })
       end
 
-      vim.lsp.config('basedpyright', {
-        -- ponytail: pull diagnostics break workspace/diagnostic on basedpyright; push + workspace mode publishes unopened files
-        init_options = { disablePullDiagnostics = true },
-        settings = {
-          basedpyright = {
-            analysis = {
-              typeCheckingMode = 'standard',
-              autoSearchPaths = true,
-              diagnosticMode = 'workspace',
-            },
-          },
-        },
-      })
-
+      -- ponytail: defaults from nvim-lspconfig (cmd = pyrefly lsp); tune via pyrefly.toml / [tool.pyrefly] per project.
+      -- basedpyright stays installed in Mason as a fallback: swap 'pyrefly' for 'basedpyright' in `servers` below.
       vim.lsp.config('html', {
         cmd = { 'vscode-html-language-server', '--stdio' },
         filetypes = { 'html', 'templ', 'htmlangular' },
@@ -146,9 +126,13 @@ return {
         },
       })
 
-      vim.lsp.config('lua_ls', {
+      -- ponytail: lazydev.nvim (common.lua) injects the vim runtime library into emmylua_ls; project .emmyrc.json overrides these.
+      vim.lsp.config('emmylua_ls', {
         settings = {
-          Lua = { completion = { callSnippet = 'Replace' } },
+          emmylua = {
+            runtime = { version = 'LuaJIT' },
+            diagnostics = { globals = { 'vim' } },
+          },
         },
       })
 
@@ -249,15 +233,17 @@ return {
       })
 
       local servers = {
-        'basedpyright',
+        'pyrefly',
         'html',
         'cssls',
         'tailwindcss',
-        'lua_ls',
+        'emmylua_ls',
         'ts_ls',
         'vue_ls',
         'angularls',
-        'sqlls',
+        'sqlls', -- redshift/generic; retire once the Redshift migration is done
+        'postgres_lsp', -- only attaches where postgres-language-server.jsonc exists
+        'jsonls',
         'gopls',
       }
 
@@ -268,14 +254,18 @@ return {
       require('mason-tool-installer').setup {
         ensure_installed = {
           'stylua',
+          'prettierd',
           'html-lsp',
           'css-lsp',
           'tailwindcss-language-server',
           'typescript-language-server',
           'angular-language-server',
           'vue-language-server',
-          'lua-language-server',
+          'emmylua_ls',
+          'json-lsp',
+          'pyrefly',
           'sqlls',
+          'postgres-language-server',
           'sqlfluff',
           'gopls',
         },

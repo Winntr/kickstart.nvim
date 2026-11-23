@@ -47,6 +47,20 @@ return {
       end,
     })
 
+    -- Forward Claude's notification (OSC 9 from preferredNotifChannel=iterm2_with_bell) to the outer terminal as a BEL + vim.notify.
+    -- ponytail: fires for any :terminal buffer that emits OSC 9, not just Claude's.
+    vim.api.nvim_create_autocmd('TermRequest', {
+      callback = function(args)
+        local seq = args.data and args.data.sequence or ''
+        local msg = seq:match '^\27%]9;(.*)$'
+        -- OSC 9;4 is ConEmu progress, not a notification
+        if msg and not msg:match '^4;' then
+          vim.fn.chansend(vim.v.stderr, '\a')
+          vim.notify(msg, vim.log.levels.INFO, { title = 'Claude Code' })
+        end
+      end,
+    })
+
     vim.keymap.set('n', '<leader>akz', fullscreen_toggle, { desc = 'Claude fullscreen toggle' })
     vim.keymap.set('n', '<leader>akv', function()
       vibe = not vibe
